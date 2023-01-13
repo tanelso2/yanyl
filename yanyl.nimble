@@ -19,4 +19,4 @@ task test, "Runs the tests":
 
 task genDocs, "Generate the docs":
   exec "nim doc --project --out:docs src/yanyl.nim"
-  exec "cp docs/theindex.html docs/index.html"
+  exec "cp docs/yanyl.html docs/index.html"
