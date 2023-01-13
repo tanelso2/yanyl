@@ -1,8 +1,10 @@
 import
-  yanyl,
   test_utils/yaml_testing,
   macros,
   unittest
+
+import
+  yanyl
 
 type
   Obj = object

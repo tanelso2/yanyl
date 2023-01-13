@@ -162,6 +162,10 @@ d:
 
 deriveYamls:
     Base
+    RBase
+    Deriv
+    VKind
+    Variant
     Complex
 
 let c: Complex = cs.loadNode().ofYaml(Complex) 
@@ -175,12 +179,6 @@ type
         my1, my2, my3
 
 deriveYaml MyEnum
-
-# dumpImpl VKind
-expandMacros:
-    deriveYaml VKind
-
-dumpImpl Variant
 
 type
     MyVariant = object

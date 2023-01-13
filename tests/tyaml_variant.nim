@@ -43,3 +43,29 @@ check v.kind == eInt
 check v.c == "c2"
 check v.i == 10
 checkRoundTrip v
+
+type
+  VList = object of RootObj
+    l: seq[V]
+
+deriveYaml VList
+
+sample = """
+l:
+  - kind: eInt
+    c: ci
+    i: 10
+  - kind: eStr
+    c: cs
+    s: hello world
+"""
+var vlist: VList = ofYamlStr(sample, VList)
+check vlist.l.len() == 2
+let ci = vlist.l[0]
+check ci.kind == eInt
+check ci.c == "ci"
+check ci.i == 10
+let cs = vlist.l[1]
+check cs.kind == eStr
+check cs.c == "cs"
+check cs.s == "hello world"
