@@ -2,7 +2,7 @@
 
 A library for working with YAML in Nim. Can generate conversion functions for most types declared in Nim.
 
-[Documentation can be found here](https://tanelso2.github.io/yanyl/index.html)
+[NimDocs can be found here](https://tanelso2.github.io/yanyl/index.html)
 
 # Example
 
