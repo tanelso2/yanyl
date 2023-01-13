@@ -1,0 +1,2 @@
+deriveYaml	yanyl/codegen.html#deriveYaml.m,typed	codegen: deriveYaml(v: typed)	
+deriveYamls	yanyl/codegen.html#deriveYamls.m,untyped	codegen: deriveYamls(body: untyped)	
