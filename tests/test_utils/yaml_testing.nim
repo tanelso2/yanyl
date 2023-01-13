@@ -23,3 +23,10 @@ proc checkRoundTrip*[T](x: T) =
 proc checkRoundTrip*(s: string) =
     let n = s.loadNode()
     checkRoundTrip n
+
+type
+    MockObj* = object of RootObj
+        s*: string
+        i*: int
+
+deriveYaml MockObj
