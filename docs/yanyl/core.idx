@@ -7,6 +7,7 @@ YNode	yanyl/core.html#YNode	core: YNode
 newYList	yanyl/core.html#newYList,seq[YNode]	core: newYList(elems: seq[YNode]): YNode	
 newYMap	yanyl/core.html#newYMap,TableRef[string,YNode]	core: newYMap(t: TableRef[string, YNode]): YNode	
 newYMap	yanyl/core.html#newYMap,openArray[]	core: newYMap(a: openArray[(string, YNode)]): YNode	
+newYMapRemoveNils	yanyl/core.html#newYMapRemoveNils,openArray[]	core: newYMapRemoveNils(a: openArray[(string, YNode)]): YNode	
 newYString	yanyl/core.html#newYString,string	core: newYString(s: string): YNode	
 newYList	yanyl/core.html#newYList,seq[string]	core: newYList(elems: seq[string]): YNode	
 newYNil	yanyl/core.html#newYNil	core: newYNil(): YNode	
