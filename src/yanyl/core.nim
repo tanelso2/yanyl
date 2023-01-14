@@ -313,22 +313,22 @@ proc translate(n: YamlNode): YNode =
       result = newYString(n.content)
 
 proc loadNode*(s: string | Stream): YNode =
-    ## Load a YNode from a YAML string or stream
-    runnableExamples:
-      let sample = """
-        s: x
-        i: 3
-        f: 0.32
-      """
-      let n = sample.loadNode()
-      doAssert n.kind == ynMap
-      doAssert n.get("s", string) == "x"
-      doAssert n.get("i", int) == 3
-      doAssert n.get("f", float) == 0.32
+  ## Load a YNode from a YAML string or stream
+  runnableExamples:
+    let sample = """
+      s: x
+      i: 3
+      f: 0.32
+    """
+    let n = sample.loadNode()
+    doAssert n.kind == ynMap
+    doAssert n.get("s", string) == "x"
+    doAssert n.get("i", int) == 3
+    doAssert n.get("f", float) == 0.32
 
-    var node: YamlNode
-    load(s,node)
-    return translate(node)
+  var node: YamlNode
+  load(s,node)
+  return translate(node)
 
 proc newline(i: int): string =
     "\n" & repeat(' ', i)

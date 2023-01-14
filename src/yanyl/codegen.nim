@@ -300,16 +300,16 @@ macro deriveYamls*(body: untyped) =
   ## Derive yamls for multiple types
   runnableExamples:
     type
-        Owner = ref object of RootObj
-            name: string
-        Pet = ref object of RootObj
-            name: string
-            kind: string
-            owner: Owner
+      Owner = ref object of RootObj
+        name: string
+      Pet = ref object of RootObj
+        name: string
+        kind: string
+        owner: Owner
 
     deriveYamls:
-        Owner
-        Pet
+      Owner
+      Pet
 
     let sample = """
       name: Garfield
