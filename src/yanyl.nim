@@ -1,9 +1,2 @@
-import
-  yanyl/[
-    core,
-    codegen
-  ]
-
-export
-  core,
-  codegen
+include yanyl/core
+include yanyl/codegen

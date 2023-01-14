@@ -104,6 +104,8 @@ proc toYaml*[T](t: TableRef[string, T]): YNode =
   newYMap(m.newTable())
 
 proc get*(n: YNode, k: string): YNode =
+    ## Get the map value associated with `k`
+    ## Throws if `n` is not a map
     expectYMap n:
         result = n.mapVal[k]
 
@@ -205,6 +207,7 @@ proc translate(n: YamlNode): YNode =
       result = newYString(n.content)
 
 proc loadNode*(s: string | Stream): YNode =
+    ## Load a YNode from a YAML string or stream
     var node: YamlNode
     load(s,node)
     return translate(node)
@@ -222,6 +225,7 @@ proc needsMultipleLines(n: YNode): bool =
     len(n.mapVal) > 0
 
 proc toString*(n: YNode, indentLevel=0): string =
+    ## Convert a YNode to a YAML string
 
     proc newline(): string =
         newline(indentLevel)
@@ -265,6 +269,7 @@ proc toString*(n: YNode, indentLevel=0): string =
     
 
 proc `==`*(a: YNode, b: YNode): bool =
+    ## Compare two yaml documents for equality 
     if a.kind != b.kind:
         return false
     else:

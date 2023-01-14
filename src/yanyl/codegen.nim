@@ -268,15 +268,16 @@ proc mkOfYamlForType(t: NimNode): NimNode =
     error("NOIMPL for empty types", t)
 
 macro deriveYaml*(v: typed) =
-    if v.kind == nnkSym and v.symKind == nskType:
-        let ofYamlDef = mkOfYamlForType v
-        let toYamlDef = mkToYamlForType v
-        result = newStmtList(
-            ofYamlDef,
-            toYamlDef
-        )
-    else:
-        error("deriveYaml only works on types", v)
+  ## Generate `ofYaml` and `toYaml` procs for a type
+  if v.kind == nnkSym and v.symKind == nskType:
+      let ofYamlDef = mkOfYamlForType v
+      let toYamlDef = mkToYamlForType v
+      result = newStmtList(
+          ofYamlDef,
+          toYamlDef
+      )
+  else:
+      error("deriveYaml only works on types", v)
 
 macro deriveYamls*(body: untyped) =
   expectKind(body, nnkStmtList)
