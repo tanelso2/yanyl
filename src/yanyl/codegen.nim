@@ -2,6 +2,7 @@ import
   macros,
   sequtils,
   sugar,
+  ./core,
   ./reflection
 
 proc mkYNodeGetCall(n: NimNode, k: string): NimNode =
@@ -269,6 +270,22 @@ proc mkOfYamlForType(t: NimNode): NimNode =
 
 macro deriveYaml*(v: typed) =
   ## Generate `ofYaml` and `toYaml` procs for a type
+  runnableExamples:
+    type
+      Obj = object
+        i: int
+        s: string
+
+    deriveYaml Obj
+
+    var sample: string = """
+    i: 99
+    s: hello world
+    """
+    var o: Obj = ofYamlStr(sample, Obj)
+    doAssert o.i == 99
+    doAssert o.s == "hello world"
+
   if v.kind == nnkSym and v.symKind == nskType:
       let ofYamlDef = mkOfYamlForType v
       let toYamlDef = mkToYamlForType v
@@ -280,6 +297,31 @@ macro deriveYaml*(v: typed) =
       error("deriveYaml only works on types", v)
 
 macro deriveYamls*(body: untyped) =
+  ## Derive yamls for multiple types
+  runnableExamples:
+    type
+        Owner = ref object of RootObj
+            name: string
+        Pet = ref object of RootObj
+            name: string
+            kind: string
+            owner: Owner
+
+    deriveYamls:
+        Owner
+        Pet
+
+    let sample = """
+      name: Garfield
+      kind: cat
+      owner:
+          name: J. Arbuckle
+    """
+    let garf = ofYamlStr(sample, Pet)
+    doAssert garf.name == "Garfield"
+    doAssert garf.kind == "cat"
+    doAssert garf.owner.name == "J. Arbuckle"
+
   expectKind(body, nnkStmtList)
   result = newStmtList()
   for x in body.children:

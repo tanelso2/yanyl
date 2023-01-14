@@ -1,4 +1,5 @@
 import
+    options,
     sequtils,
     streams,
     strformat,
@@ -23,7 +24,13 @@ type
       mapVal*: TableRef[string, YNode]
 
 proc newYList*(elems: seq[YNode]): YNode =
-    YNode(kind:ynList, listVal: elems)
+  runnableExamples:
+    let list = @[newYNil(), newYNil()]
+    let node = newYList(list)
+    doAssert node.kind == ynList
+    doAssert node.listVal.len == 2
+
+  YNode(kind:ynList, listVal: elems)
 
 proc newYMap*(t: TableRef[string,YNode]): YNode =
     YNode(kind: ynMap, mapVal: t)
@@ -32,6 +39,14 @@ proc newYMap*(a: openArray[(string,YNode)]): YNode =
     a.newTable().newYMap()
 
 proc newYMapRemoveNils*(a: openArray[(string, YNode)]): YNode =
+  runnableExamples:
+    import std/tables
+    let node = newYMapRemoveNils(
+                [("a", newYString("astring")), 
+                 ("b", newYNil())])
+    doAssert node.kind == ynMap
+    doAssert node.mapVal.len == 1
+
   let t = collect:
     for (k,v) in a.items:
       if v.kind != ynNil:
@@ -72,7 +87,11 @@ template expectYMap*(n, body: untyped) =
 # Added because the compiler was unable to find ofYaml[T]
 # when evaluating ofYaml[seq[T]] 
 proc ofYaml*[T](n: YNode, t: typedesc[T]): T =
-    raise newException(ValueError, fmt"No implementation of ofYaml for type {$t}")
+  ## Default implementation
+  ## 
+  ## Throws an exception complaining that no more specific version of `ofYaml` for type `t` couldn't be found
+  ## 
+  raise newException(ValueError, fmt"No implementation of ofYaml for type {$t}")
 
 proc toYaml*(s: string): YNode =
     newYString(s)
@@ -111,38 +130,102 @@ proc toYaml*[T](t: TableRef[string, T]): YNode =
   newYMap(m.newTable())
 
 proc get*(n: YNode, k: string): YNode =
-    ## Get the map value associated with `k`
-    ## Throws if `n` is not a map
-    expectYMap n:
-        result = n.mapVal[k]
+  ## Get the map value associated with `k`
+  ## 
+  ## Throws if `n` is not a map
+  runnableExamples:
+    let m = newYMap({
+      "a": newYString("astring")
+    })
+    let a = m.get("a")
+    doAssert a.kind == ynString
+    doAssert a.strVal == "astring"
+
+  expectYMap n:
+      result = n.mapVal[k]
 
 proc elems*(n: YNode): seq[YNode] =
-    expectYList n:
-        result = n.listVal
+  ## Get the list value of the node
+  ## 
+  ## Throws if `n` is not a list
+  runnableExamples:
+    let l = newYList(@[newYNil(),
+                       newYString("abc")])
+    let items = l.elems()
+    doAssert len(items) == 2
+    doAssert items[0].kind == ynNil
+    doAssert items[1].strVal == "abc"
+
+  expectYList n:
+      result = n.listVal
 
 proc str*(n: YNode): string =
-    expectYString n:
-        result = n.strVal
+  ## Get the string value of the node
+  ## 
+  ## Throws if `n` is not a string
+  runnableExamples:
+    let s = newYString("abc")
+    doAssert s.str() == "abc"
+
+  expectYString n:
+      result = n.strVal
 
 proc getStr*(n: YNode, k: string): string =
     expectYMap n:
         n.get(k).str()
 
 proc toInt*(n: YNode): int =
-    expectYString n:
-        result = parseInt(n.strVal)
+  ## Get the int value of the node
+  ## 
+  ## Throws if `n` is not a string
+  runnableExamples:
+    let n = newYString("123")
+    doAssert n.toInt() == 123
+
+  expectYString n:
+      result = parseInt(n.strVal)
 
 proc toFloat*(n: YNode): float =
-    expectYString n:
-        result = parseFloat(n.strVal)
+  ## Get the int value of the node
+  ## 
+  ## Throws if `n` is not a string
+  runnableExamples:
+    let n = newYString("3.14")
+    doAssert n.toFloat() == 3.14 
+
+  expectYString n:
+      result = parseFloat(n.strVal)
 
 proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
-    expectYList n:
-        result = collect:
-            for x in n.elems():
-                ofYaml(x, T)
+  runnableExamples:
+    let l = newYList(@[
+      newYString("1"),
+      newYString("2"),
+      newYString("3")
+    ])
+    let res = ofYaml(l, seq[int])
+    doAssert res.len == 3
+    doAssert res[0] == 1
+    doAssert res[1] == 2
+    doAssert res[2] == 3
+
+  expectYList n:
+      result = collect:
+          for x in n.elems():
+              ofYaml(x, T)
 
 proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
+  runnableExamples:
+    import std/options
+
+    let n1 = newYNil()
+    let o1 = ofYaml(n1, Option[string])
+    doAssert o1.isNone
+    let n2 = newYString("heyo")
+    let o2 = ofYaml(n2, Option[string])
+    doAssert o2.isSome
+    doAssert o2.get() == "heyo"
+
   case n.kind
   of ynNil:
     return none(T)
@@ -150,16 +233,32 @@ proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
     return some(ofYaml(n, T))
 
 proc ofYaml*(n: YNode, t: typedesc[int]): int =
-    n.toInt()
+  runnableExamples:
+    let n = newYString("8675309")
+    doAssert ofYaml(n, int) == 8675309
+
+  n.toInt()
 
 proc ofYaml*(n: YNode, t: typedesc[float]): float =
-    n.toFloat()
+  runnableExamples:
+    let n = newYString("3.14")
+    doAssert ofYaml(n, float) == 3.14
+
+  n.toFloat()
 
 proc ofYaml*(n: YNode, t: typedesc[string]): string =
-    n.str()
+  runnableExamples:
+    let n = newYString("yep")
+    doAssert ofYaml(n, string) == "yep"
+
+  n.str()
 
 proc ofYaml*(n: YNode, t: typedesc[bool]): bool =
-    parseBool(n.str())
+  runnableExamples:
+    doAssert ofYaml(newYString("true"), bool) == true
+    doAssert ofYaml(newYString("false"), bool) == false
+
+  parseBool(n.str())
 
 proc ofYaml*[T](n: YNode, t: typedesc[Table[string, T]]): Table[string, T] =
   expectYMap n:
@@ -215,6 +314,18 @@ proc translate(n: YamlNode): YNode =
 
 proc loadNode*(s: string | Stream): YNode =
     ## Load a YNode from a YAML string or stream
+    runnableExamples:
+      let sample = """
+        s: x
+        i: 3
+        f: 0.32
+      """
+      let n = sample.loadNode()
+      doAssert n.kind == ynMap
+      doAssert n.get("s", string) == "x"
+      doAssert n.get("i", int) == 3
+      doAssert n.get("f", float) == 0.32
+
     var node: YamlNode
     load(s,node)
     return translate(node)
