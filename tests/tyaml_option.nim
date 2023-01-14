@@ -2,6 +2,7 @@ import
   yanyl,
   test_utils/yaml_testing,
   std/options,
+  strutils,
   unittest
 
 type
@@ -45,4 +46,6 @@ check hekate.primaryJob.name == "Witch"
 check hekate.primaryJob.weaponOfChoice.isNone()
 check hekate.secondaryJob.isNone()
 
-echo heroes.toYaml().toString()
+let hs = hekate.toYamlStr()
+# toString shouldn't put nones in the maps
+check hs.contains("secondaryJob") == false

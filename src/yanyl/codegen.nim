@@ -90,7 +90,7 @@ proc mkToYamlForObjType(t: NimNode, fields: seq[Field]): NimNode =
         params=[retType, newIdentDefs(obj, t)],
         body=nnkStmtList.newTree(
             newCall(
-                ident("newYMap"),
+                ident("newYMapRemoveNils"),
                 nnkTableConstr.newTree(
                     fields.mapIt(mkObjTypeTableField(it, obj))
                 )
@@ -221,7 +221,7 @@ proc mkToYamlForVariantType(t: NimNode,
       nnkAsgn.newTree(
         ident("result"),
         newCall(
-          ident("newYMap"),
+          ident("newYMapRemoveNils"),
           nnkTableConstr.newTree(
             neededFields.mapIt(mkObjTypeTableField(it, obj))
           )

@@ -31,6 +31,13 @@ proc newYMap*(t: TableRef[string,YNode]): YNode =
 proc newYMap*(a: openArray[(string,YNode)]): YNode =
     a.newTable().newYMap()
 
+proc newYMapRemoveNils*(a: openArray[(string, YNode)]): YNode =
+  let t = collect:
+    for (k,v) in a.items:
+      if v.kind != ynNil:
+        (k, v)
+  return t.newTable().newYMap()
+
 proc newYString*(s: string): YNode =
     YNode(kind: ynString, strVal: s)
 
