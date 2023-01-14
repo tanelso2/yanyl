@@ -118,6 +118,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dt><a name="get" href="#get"><span>get:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="core: get(n: YNode; k: string): YNode" href="yanyl/core.html#get%2CYNode%2Cstring">core: get(n: YNode; k: string): YNode</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: get[T](n: YNode; k: string; t: typedesc[Option[T]]): Option[T]" href="yanyl/core.html#get%2CYNode%2Cstring%2Ctypedesc%5BOption%5BT%5D%5D">core: get[T](n: YNode; k: string; t: typedesc[Option[T]]): Option[T]</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: get[T](n: YNode; k: string; t: typedesc[T]): T" href="yanyl/core.html#get%2CYNode%2Cstring%2Ctypedesc%5BT%5D">core: get[T](n: YNode; k: string; t: typedesc[T]): T</a></li>
           </ul></dd>
 <dt><a name="getName" href="#getName"><span>getName:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -147,6 +151,10 @@ window.addEventListener('DOMContentLoaded', main);
           <li><a class="reference external"
           data-doc-search-tag="core: newYMap(t: TableRef[string, YNode]): YNode" href="yanyl/core.html#newYMap%2CTableRef%5Bstring%2CYNode%5D">core: newYMap(t: TableRef[string, YNode]): YNode</a></li>
           </ul></dd>
+<dt><a name="newYNil" href="#newYNil"><span>newYNil:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="core: newYNil(): YNode" href="yanyl/core.html#newYNil">core: newYNil(): YNode</a></li>
+          </ul></dd>
 <dt><a name="newYString" href="#newYString"><span>newYString:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="core: newYString(s: string): YNode" href="yanyl/core.html#newYString%2Cstring">core: newYString(s: string): YNode</a></li>
@@ -171,11 +179,17 @@ window.addEventListener('DOMContentLoaded', main);
           <li><a class="reference external"
           data-doc-search-tag="core: ofYaml(n: YNode; t: typedesc[int]): int" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5Bint%5D">core: ofYaml(n: YNode; t: typedesc[int]): int</a></li>
           <li><a class="reference external"
+          data-doc-search-tag="core: ofYaml[T](n: YNode; t: typedesc[Option[T]]): Option[T]" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5BOption%5BT%5D%5D">core: ofYaml[T](n: YNode; t: typedesc[Option[T]]): Option[T]</a></li>
+          <li><a class="reference external"
           data-doc-search-tag="core: ofYaml[T](n: YNode; t: typedesc[seq[T]]): seq[T]" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5Bseq%5BT%5D%5D">core: ofYaml[T](n: YNode; t: typedesc[seq[T]]): seq[T]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="core: ofYaml(n: YNode; t: typedesc[string]): string" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5Bstring%5D">core: ofYaml(n: YNode; t: typedesc[string]): string</a></li>
           <li><a class="reference external"
           data-doc-search-tag="core: ofYaml[T](n: YNode; t: typedesc[T]): T" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5BT%5D">core: ofYaml[T](n: YNode; t: typedesc[T]): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: ofYaml[T](n: YNode; t: typedesc[Table[string, T]]): Table[string, T]" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5BTable%5Bstring%2CT%5D%5D">core: ofYaml[T](n: YNode; t: typedesc[Table[string, T]]): Table[string, T]</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: ofYaml[T](n: YNode; t: typedesc[TableRef[string, T]]): TableRef[string, T]" href="yanyl/core.html#ofYaml%2CYNode%2Ctypedesc%5BTableRef%5Bstring%2CT%5D%5D">core: ofYaml[T](n: YNode; t: typedesc[TableRef[string, T]]): TableRef[string, T]</a></li>
           </ul></dd>
 <dt><a name="ofYamlStr" href="#ofYamlStr"><span>ofYamlStr:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -221,9 +235,15 @@ window.addEventListener('DOMContentLoaded', main);
           <li><a class="reference external"
           data-doc-search-tag="core: toYaml(i: int): YNode" href="yanyl/core.html#toYaml%2Cint">core: toYaml(i: int): YNode</a></li>
           <li><a class="reference external"
+          data-doc-search-tag="core: toYaml[T](o: Option[T]): YNode" href="yanyl/core.html#toYaml%2COption%5BT%5D">core: toYaml[T](o: Option[T]): YNode</a></li>
+          <li><a class="reference external"
           data-doc-search-tag="core: toYaml[T](l: seq[T]): YNode" href="yanyl/core.html#toYaml%2Cseq%5BT%5D">core: toYaml[T](l: seq[T]): YNode</a></li>
           <li><a class="reference external"
           data-doc-search-tag="core: toYaml(s: string): YNode" href="yanyl/core.html#toYaml%2Cstring">core: toYaml(s: string): YNode</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: toYaml[T](t: Table[string, T]): YNode" href="yanyl/core.html#toYaml%2CTable%5Bstring%2CT%5D">core: toYaml[T](t: Table[string, T]): YNode</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="core: toYaml[T](t: TableRef[string, T]): YNode" href="yanyl/core.html#toYaml%2CTableRef%5Bstring%2CT%5D">core: toYaml[T](t: TableRef[string, T]): YNode</a></li>
           </ul></dd>
 <dt><a name="toYamlStr" href="#toYamlStr"><span>toYamlStr:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -236,6 +256,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dt><a name="ynMap" href="#ynMap"><span>ynMap:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="YNodeKind.ynMap" href="yanyl/core.html#ynMap">YNodeKind.ynMap</a></li>
+          </ul></dd>
+<dt><a name="ynNil" href="#ynNil"><span>ynNil:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="YNodeKind.ynNil" href="yanyl/core.html#ynNil">YNodeKind.ynNil</a></li>
           </ul></dd>
 <dt><a name="YNode" href="#YNode"><span>YNode:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -254,7 +278,7 @@ window.addEventListener('DOMContentLoaded', main);
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-13 17:44:32 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-14 06:25:34 UTC</small>
       </div>
     </div>
   </div>

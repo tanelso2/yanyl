@@ -104,6 +104,9 @@ window.addEventListener('DOMContentLoaded', main);
       <li><a class="reference" href="#YNode"
     title="YNode = object
   case kind*: YNodeKind
+  of ynNil:
+      nil
+
   of ynString:
       strVal*: string
 
@@ -114,7 +117,7 @@ window.addEventListener('DOMContentLoaded', main);
       mapVal*: TableRef[string, YNode]">YNode</a></li>
   <li><a class="reference" href="#YNodeKind"
     title="YNodeKind = enum
-  ynString, ynList, ynMap">YNodeKind</a></li>
+  ynString, ynList, ynMap, ynNil">YNodeKind</a></li>
 
   </ul>
 </li>
@@ -134,6 +137,10 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">get
       <li><a class="reference" href="#get%2CYNode%2Cstring"
     title="get(n: YNode; k: string): YNode">get(n: YNode; k: string): YNode</a></li>
+  <li><a class="reference" href="#get%2CYNode%2Cstring%2Ctypedesc%5BOption%5BT%5D%5D"
+    title="get[T](n: YNode; k: string; t: typedesc[Option[T]]): Option[T]">get[T](n: YNode; k: string; t: typedesc[Option[T]]): Option[T]</a></li>
+  <li><a class="reference" href="#get%2CYNode%2Cstring%2Ctypedesc%5BT%5D"
+    title="get[T](n: YNode; k: string; t: typedesc[T]): T">get[T](n: YNode; k: string; t: typedesc[T]): T</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">getStr
@@ -160,6 +167,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="newYMap(t: TableRef[string, YNode]): YNode">newYMap(t: TableRef[string, YNode]): YNode</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">newYNil
+      <li><a class="reference" href="#newYNil"
+    title="newYNil(): YNode">newYNil(): YNode</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">newYString
       <li><a class="reference" href="#newYString%2Cstring"
     title="newYString(s: string): YNode">newYString(s: string): YNode</a></li>
@@ -174,10 +186,16 @@ window.addEventListener('DOMContentLoaded', main);
     title="ofYaml(n: YNode; t: typedesc[int]): int">ofYaml(n: YNode; t: typedesc[int]): int</a></li>
   <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5Bstring%5D"
     title="ofYaml(n: YNode; t: typedesc[string]): string">ofYaml(n: YNode; t: typedesc[string]): string</a></li>
+  <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5BOption%5BT%5D%5D"
+    title="ofYaml[T](n: YNode; t: typedesc[Option[T]]): Option[T]">ofYaml[T](n: YNode; t: typedesc[Option[T]]): Option[T]</a></li>
   <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5Bseq%5BT%5D%5D"
     title="ofYaml[T](n: YNode; t: typedesc[seq[T]]): seq[T]">ofYaml[T](n: YNode; t: typedesc[seq[T]]): seq[T]</a></li>
   <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5BT%5D"
     title="ofYaml[T](n: YNode; t: typedesc[T]): T">ofYaml[T](n: YNode; t: typedesc[T]): T</a></li>
+  <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5BTable%5Bstring%2CT%5D%5D"
+    title="ofYaml[T](n: YNode; t: typedesc[Table[string, T]]): Table[string, T]">ofYaml[T](n: YNode; t: typedesc[Table[string, T]]): Table[string, T]</a></li>
+  <li><a class="reference" href="#ofYaml%2CYNode%2Ctypedesc%5BTableRef%5Bstring%2CT%5D%5D"
+    title="ofYaml[T](n: YNode; t: typedesc[TableRef[string, T]]): TableRef[string, T]">ofYaml[T](n: YNode; t: typedesc[TableRef[string, T]]): TableRef[string, T]</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">ofYamlStr
@@ -216,6 +234,12 @@ window.addEventListener('DOMContentLoaded', main);
     title="toYaml(s: string): YNode">toYaml(s: string): YNode</a></li>
   <li><a class="reference" href="#toYaml%2Cseq%5BT%5D"
     title="toYaml[T](l: seq[T]): YNode">toYaml[T](l: seq[T]): YNode</a></li>
+  <li><a class="reference" href="#toYaml%2COption%5BT%5D"
+    title="toYaml[T](o: Option[T]): YNode">toYaml[T](o: Option[T]): YNode</a></li>
+  <li><a class="reference" href="#toYaml%2CTable%5Bstring%2CT%5D"
+    title="toYaml[T](t: Table[string, T]): YNode">toYaml[T](t: Table[string, T]): YNode</a></li>
+  <li><a class="reference" href="#toYaml%2CTableRef%5Bstring%2CT%5D"
+    title="toYaml[T](t: TableRef[string, T]): YNode">toYaml[T](t: TableRef[string, T]): YNode</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">toYamlStr
@@ -251,7 +275,11 @@ window.addEventListener('DOMContentLoaded', main);
 </ul>
 
   </div>
-  
+  &nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L1"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L1" class="link-seesrc" target="_blank" >Edit</a>
+
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
@@ -262,6 +290,9 @@ window.addEventListener('DOMContentLoaded', main);
 <div id="YNode">
 <dt><pre><a href="core.html#YNode"><span class="Identifier">YNode</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="core.html#YNodeKind"><span class="Identifier">YNodeKind</span></a>
+  <span class="Keyword">of</span> <span class="Identifier">ynNil</span><span class="Other">:</span>
+      <span class="Keyword">nil</span>
+
   <span class="Keyword">of</span> <span class="Identifier">ynString</span><span class="Other">:</span>
       <span class="Identifier">strVal</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
 
@@ -275,15 +306,23 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L14"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L14" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
 <div id="YNodeKind">
 <dt><pre><a href="core.html#YNodeKind"><span class="Identifier">YNodeKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">ynString</span><span class="Other">,</span> <span class="Identifier">ynList</span><span class="Other">,</span> <span class="Identifier">ynMap</span></pre></dt>
+  <span class="Identifier">ynString</span><span class="Other">,</span> <span class="Identifier">ynList</span><span class="Other">,</span> <span class="Identifier">ynMap</span><span class="Other">,</span> <span class="Identifier">ynNil</span></pre></dt>
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L12"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L12" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -297,6 +336,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L267"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L267" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -305,6 +348,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L110"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -313,6 +360,34 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L106"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L106" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="get,YNode,string,typedesc[Option[T]]">
+<dt><pre><span class="Keyword">proc</span> <a href="#get%2CYNode%2Cstring%2Ctypedesc%5BOption%5BT%5D%5D"><span class="Identifier">get</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a><span class="Other">;</span> <span class="Identifier">k</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">typedesc</span><span class="Other">[</span><span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L173"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L173" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="get,YNode,string,typedesc[T]">
+<dt><pre><span class="Keyword">proc</span> <a href="#get%2CYNode%2Cstring%2Ctypedesc%5BT%5D"><span class="Identifier">get</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a><span class="Other">;</span> <span class="Identifier">k</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">typedesc</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L169"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L169" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -322,6 +397,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L118"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -330,6 +409,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L207"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -338,6 +421,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L37"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L37" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -346,6 +433,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L25"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L25" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -354,6 +445,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L31"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L31" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -362,6 +457,22 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L28"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L28" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="newYNil">
+<dt><pre><span class="Keyword">proc</span> <a href="#newYNil"><span class="Identifier">newYNil</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L40"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L40" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -370,6 +481,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L34"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L34" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -378,6 +493,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L152"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -386,6 +505,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L146"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L146" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -394,6 +517,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L143"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L143" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -402,6 +529,22 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L149"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L149" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="ofYaml,YNode,typedesc[Option[T]]">
+<dt><pre><span class="Keyword">proc</span> <a href="#ofYaml%2CYNode%2Ctypedesc%5BOption%5BT%5D%5D"><span class="Identifier">ofYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a><span class="Other">;</span> <span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">typedesc</span><span class="Other">[</span><span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L136"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L136" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -410,6 +553,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L130"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L130" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -418,6 +565,34 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L67"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L67" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="ofYaml,YNode,typedesc[Table[string,T]]">
+<dt><pre><span class="Keyword">proc</span> <a href="#ofYaml%2CYNode%2Ctypedesc%5BTable%5Bstring%2CT%5D%5D"><span class="Identifier">ofYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a><span class="Other">;</span> <span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">typedesc</span><span class="Other">[</span><span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L155"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L155" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="ofYaml,YNode,typedesc[TableRef[string,T]]">
+<dt><pre><span class="Keyword">proc</span> <a href="#ofYaml%2CYNode%2Ctypedesc%5BTableRef%5Bstring%2CT%5D%5D"><span class="Identifier">ofYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a><span class="Other">;</span> <span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">typedesc</span><span class="Other">[</span><span class="Identifier">TableRef</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">TableRef</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L162"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -426,6 +601,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L286"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -434,6 +613,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L114"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L114" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -442,6 +625,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L126"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L126" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -450,6 +637,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L122"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L122" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -459,6 +650,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L224"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -467,6 +662,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L79"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L79" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -475,6 +674,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L76"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L76" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -483,6 +686,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L73"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -491,6 +698,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L70"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L70" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -499,6 +710,46 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L82"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L82" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="toYaml,Option[T]">
+<dt><pre><span class="Keyword">proc</span> <a href="#toYaml%2COption%5BT%5D"><span class="Identifier">toYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L88"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="toYaml,Table[string,T]">
+<dt><pre><span class="Keyword">proc</span> <a href="#toYaml%2CTable%5Bstring%2CT%5D"><span class="Identifier">toYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L94"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="toYaml,TableRef[string,T]">
+<dt><pre><span class="Keyword">proc</span> <a href="#toYaml%2CTableRef%5Bstring%2CT%5D"><span class="Identifier">toYaml</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">TableRef</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="core.html#YNode"><span class="Identifier">YNode</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L100"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L100" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -507,6 +758,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L289"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L289" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -520,6 +775,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L50"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L50" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -528,6 +787,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L57"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L57" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -536,6 +799,10 @@ window.addEventListener('DOMContentLoaded', main);
 <dd>
 
 
+&nbsp;&nbsp;<a
+href="https://github.com/tanelso2/yanyl/tree/0c7c7d3/src/yanyl/core.nim#L43"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/tanelso2/yanyl/edit/main/src/yanyl/core.nim#L43" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -549,7 +816,7 @@ window.addEventListener('DOMContentLoaded', main);
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-13 17:44:32 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-14 06:25:34 UTC</small>
       </div>
     </div>
   </div>

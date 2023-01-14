@@ -8,14 +8,21 @@ proc mkYNodeGetCall(n: NimNode, k: string): NimNode =
   newCall(newDotExpr(n, ident("get")),
           newStrLitNode(k))
 
+proc mkYNodeGetCall(n: NimNode, k: string, t: NimNode): NimNode =
+  newCall(newDotExpr(n, ident("get")),
+          newLit(k),
+          t)
+
+proc mkTypedesc(t: NimNode): NimNode =
+  nnkBracketExpr.newTree(
+    ident("typedesc"), t
+  )
+
 proc getValueForField(f: Field, obj: NimNode): NimNode =
-    newCall("ofYaml",
-        mkYNodeGetCall(obj, f.getName()),
-        nnkBracketExpr.newTree(
-          ident("typedesc"),
-          f.getT()
-        )
-    )
+    mkYNodeGetCall(
+      obj, 
+      f.getName(), 
+      mkTypedesc(f.getT()))
 
 proc pubIdent(s: string): NimNode =
   nnkPostfix.newTree(

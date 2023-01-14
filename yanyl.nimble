@@ -14,9 +14,14 @@ requires "nim >= 1.6.8"
 requires "yaml"
 requires "https://github.com/tanelso2/nim_utils >= 0.3.0"
 
+import
+  strformat
+
 task test, "Runs the tests":
   exec "testament p 'tests/t*.nim'"
 
 task genDocs, "Generate the docs":
-  exec "nim doc --project --out:docs src/yanyl.nim"
+  let gitHash = gorge "git rev-parse --short HEAD"
+  let url = "https://github.com/tanelso2/yanyl"
+  exec fmt"nim doc --project --git.url:{url} --git.commit:{gitHash} --git.devel:main --outdir:docs src/yanyl.nim"
   exec "cp docs/yanyl.html docs/index.html"

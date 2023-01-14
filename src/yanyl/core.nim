@@ -10,9 +10,11 @@ import
 
 type
   YNodeKind* = enum
-    ynString, ynList, ynMap
+    ynString, ynList, ynMap, ynNil
   YNode* = object
     case kind*: YNodeKind
+    of ynNil:
+      discard
     of ynString:
       strVal*: string
     of ynList:
@@ -35,6 +37,9 @@ proc newYString*(s: string): YNode =
 proc newYList*(elems: seq[string]): YNode =
     YNode(kind:ynList, listVal: elems.map(newYString))
 
+proc newYNil*(): YNode =
+  YNode(kind: ynNil)
+
 template expectYString*(n, body: untyped) =
     case n.kind
     of ynString:
@@ -55,6 +60,48 @@ template expectYMap*(n, body: untyped) =
         body
     else:
         raise newException(ValueError, "expected map YNode")
+
+# HACKY AND I DON'T LIKE IT
+# Added because the compiler was unable to find ofYaml[T]
+# when evaluating ofYaml[seq[T]] 
+proc ofYaml*[T](n: YNode, t: typedesc[T]): T =
+    raise newException(ValueError, fmt"No implementation of ofYaml for type {$t}")
+
+proc toYaml*(s: string): YNode =
+    newYString(s)
+
+proc toYaml*(i: int): YNode =
+    newYString($i)
+
+proc toYaml*(f: float): YNode =
+    newYString($f)
+
+proc toYaml*(b: bool): YNode =
+    newYString($b)
+
+proc toYaml*[T](l: seq[T]): YNode =
+    let elems = collect:
+        for x in l:
+            toYaml(x)
+    return elems.newYList()
+
+proc toYaml*[T](o: Option[T]): YNode =
+  if o.isSome():
+    toYaml(o.get())
+  else:
+    newYNil()
+
+proc toYaml*[T](t: Table[string, T]): YNode =
+  let m = collect:
+    for k,v in t.pairs:
+      (k, toYaml(v))
+  newYMap(m.newTable())
+
+proc toYaml*[T](t: TableRef[string, T]): YNode =
+  let m = collect:
+    for k,v in t.pairs:
+      (k, toYaml(v))
+  newYMap(m.newTable())
 
 proc get*(n: YNode, k: string): YNode =
     expectYMap n:
@@ -80,6 +127,58 @@ proc toFloat*(n: YNode): float =
     expectYString n:
         result = parseFloat(n.strVal)
 
+proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
+    expectYList n:
+        result = collect:
+            for x in n.elems():
+                ofYaml(x, T)
+
+proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
+  case n.kind
+  of ynNil:
+    return none(T)
+  else:
+    return some(ofYaml(n, T))
+
+proc ofYaml*(n: YNode, t: typedesc[int]): int =
+    n.toInt()
+
+proc ofYaml*(n: YNode, t: typedesc[float]): float =
+    n.toFloat()
+
+proc ofYaml*(n: YNode, t: typedesc[string]): string =
+    n.str()
+
+proc ofYaml*(n: YNode, t: typedesc[bool]): bool =
+    parseBool(n.str())
+
+proc ofYaml*[T](n: YNode, t: typedesc[Table[string, T]]): Table[string, T] =
+  expectYMap n:
+    let m = collect:
+      for k,v in n.mapVal.pairs:
+        {k: ofYaml(v, T)}
+    return m
+
+proc ofYaml*[T](n: YNode, t: typedesc[TableRef[string, T]]): TableRef[string, T] =
+  expectYMap n:
+    let m = collect:
+      for k,v in n.mapVal.pairs:
+        (k, ofYaml(v, T))
+    return m.newTable()
+
+proc get*[T](n: YNode, k: string, t: typedesc[T]): T =
+  expectYMap n:
+    result = n.get(k).ofYaml(t)
+
+proc get*[T](n: YNode, k: string, t: typedesc[Option[T]]): Option[T] =
+  expectYMap n:
+    let m = n.mapVal
+    if k in m:
+      some(ofYaml(m[k], T))
+    else:
+      none(T)
+
+
 proc simplifyName(k: YamlNode): string =
   case k.kind
   of yScalar:
@@ -99,7 +198,11 @@ proc translate(n: YamlNode): YNode =
     let elems = n.elems.mapIt(translate(it))
     result = newYList(elems)
   else:
-    result = newYString(n.content)
+    let content = n.content
+    if content == "null":
+      result = newYNil()
+    else:
+      result = newYString(n.content)
 
 proc loadNode*(s: string | Stream): YNode =
     var node: YamlNode
@@ -108,6 +211,15 @@ proc loadNode*(s: string | Stream): YNode =
 
 proc newline(i: int): string =
     "\n" & repeat(' ', i)
+
+proc needsMultipleLines(n: YNode): bool =
+  case n.kind
+  of ynNil, ynString:
+    false
+  of ynList:
+    len(n.listVal) > 0
+  of ynMap:
+    len(n.mapVal) > 0
 
 proc toString*(n: YNode, indentLevel=0): string =
 
@@ -125,20 +237,21 @@ proc toString*(n: YNode, indentLevel=0): string =
         let fields = n.mapVal
         let s = collect:
             for k,v in fields.pairs:
-                case v.kind
-                of ynString:
-                    let newIndent = indentLevel + len(k) + 2
-                    let vstr = v.toString(indentLevel=newIndent)
-                    fmt"{k}: {vstr}"
-                else:
-                    let newIndent = indentLevel+2
-                    let vstr = v.toString(indentLevel=newIndent)
-                    fmt"{k}:{newline(newIndent)}{vstr}"
+              if needsMultipleLines v:
+                let newIndent = indentLevel+2
+                let vstr = v.toString(indentLevel=newIndent)
+                fmt"{k}:{newline(newIndent)}{vstr}"
+              else:
+                let newIndent = indentLevel + len(k) + 2
+                let vstr = v.toString(indentLevel=newIndent)
+                fmt"{k}: {vstr}"
         case len(s)
         of 0:
             return "{}"
         else:
             return s.join(newline())
+    of ynNil:
+      return "null" 
     of ynList:
         let elems = n.listVal
         case len(elems)
@@ -149,55 +262,16 @@ proc toString*(n: YNode, indentLevel=0): string =
                 .mapIt(toString(it,indentLevel=indentLevel+2))
                 .mapIt("- $1" % it)
                 .join(newline())
-
-# HACKY AND I DON'T LIKE IT
-# Added because the compiler was unable to find ofYaml[T]
-# when evaluating ofYaml[seq[T]] 
-proc ofYaml*[T](n: YNode, t: typedesc[T]): T =
-    raise newException(ValueError, "No implementation of ofYaml for type")
     
-
-proc toYaml*(s: string): YNode =
-    newYString(s)
-
-proc toYaml*(i: int): YNode =
-    newYString($i)
-
-proc toYaml*(f: float): YNode =
-    newYString($f)
-
-proc toYaml*(b: bool): YNode =
-    newYString($b)
-
-proc toYaml*[T](l: seq[T]): YNode =
-    let elems = collect:
-        for x in l:
-            toYaml(x)
-    return elems.newYList()
-
-proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
-    expectYList n:
-        result = collect:
-            for x in n.elems():
-                ofYaml(x, T)
-
-proc ofYaml*(n: YNode, t: typedesc[int]): int =
-    n.toInt()
-
-proc ofYaml*(n: YNode, t: typedesc[float]): float =
-    n.toFloat()
-
-proc ofYaml*(n: YNode, t: typedesc[string]): string =
-    n.str()
-
-proc ofYaml*(n: YNode, t: typedesc[bool]): bool =
-    parseBool(n.str())
 
 proc `==`*(a: YNode, b: YNode): bool =
     if a.kind != b.kind:
         return false
     else:
         case a.kind
+        of ynNil:
+          # Two nil vals equal each other
+          return true
         of ynString:
             return a.strVal == b.strVal
         of ynList:
