@@ -1,7 +1,7 @@
 # Package
 # Yet Another Nim Yaml Library
 # YANYL
-version       = "0.0.1"
+version       = "0.0.2"
 author        = "Thomas Nelson"
 description   = "A library for working with YAML in Nim"
 license       = "Unlicense"
