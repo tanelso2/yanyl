@@ -12,7 +12,7 @@ type
     name*: string
     t*: NimNode
   ObjType* = enum
-    otObj, otVariant, otEnum, otEmpty, otTypeAlias, otDistinct
+    otObj, otVariant, otEnum, otEmpty, otTypeAlias, otDistinct, otTuple
   NimVariant* = object of RootObj
     name*: string
     fields*: seq[Field]
@@ -35,6 +35,11 @@ type
       t*: NimNode
     of otDistinct:
       base*: NimNode
+    of otTuple:
+      tupleFields*: seq[Field]
+
+proc newTupleFields(fields: seq[Field]): ObjFields =
+  ObjFields(kind: otTuple, tupleFields: fields)
 
 proc newDistinct(base: NimNode): ObjFields =
   ObjFields(kind: otDistinct, base: base)
@@ -70,8 +75,6 @@ proc getTypeDefName*(n: NimNode): string =
   n[0].strVal
 
 proc combine(a,b: ObjFields): ObjFields =
-  proc noimpl() =
-    raise newException(ValueError, fmt"No implementation for comparing {a.kind} and {b.kind}")
   case (a.kind, b.kind)
   of (otEmpty, _):
     result = b
@@ -101,7 +104,7 @@ proc combine(a,b: ObjFields): ObjFields =
   of (otEnum, otEnum):
     result = newEnumFields(concat(a.vals, b.vals))
   else:
-    noimpl()
+    raise newException(ValueError, fmt"No implementation for comparing {a.kind} and {b.kind}")
 
 proc combineAll(x: seq[ObjFields]): ObjFields =
   foldl(x, combine(a,b))
@@ -226,6 +229,14 @@ proc collectFieldsFromDefinition(t: NimNode): ObjFields =
     return combine(parent, base)
   of nnkDistinctTy:
     return newDistinct(t[0])
+  of nnkTupleTy:
+    let objFields = t
+      .children
+      .toSeq()
+      .map(collectObjFields)
+      .combineAll()
+    assert objFields.kind == otObj
+    return newTupleFields(objFields.fields)
   else:
     return newTypeAlias(t)
 
