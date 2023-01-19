@@ -41,36 +41,50 @@ proc mkObjTypeConsFieldParam(f: Field, obj: NimNode): NimNode =
 
 
 proc mkOfYamlForObjType(t: NimNode, fields: seq[Field]): NimNode =
-    let retType = t
-    let nodeParam = newIdentDefs(ident("n"), ident("YNode"))
-    let typeParam = newIdentDefs(ident("t"), 
-                                 nnkBracketExpr.newTree(
-                                    ident "typedesc",
-                                    retType
-                                 ))
-    let n = ident("n")
-    newProc(
-        name=pubIdent("ofYaml"),
-        params=[retType, nodeParam, typeParam],
-        body=nnkStmtList.newTree(
-            nnkCommand.newTree(
-                ident("expectYMap"),
-                n,
-                newStmtList(
-                    nnkAsgn.newTree(
-                        ident("result"),
-                        nnkObjConstr.newTree(
-                            concat(
-                              @[retType],
-                              fields.mapIt(mkObjTypeConsFieldParam(it, n))
-                            )
-                        )
-                    )
+  let retType = t
+  let nodeParam = newIdentDefs(ident("n"), ident("YNode"))
+  let typeParam = newIdentDefs(ident("t"), 
+                                nnkBracketExpr.newTree(
+                                  ident "typedesc",
+                                  retType
+                                ))
+  let n = ident("n")
+  newProc(
+    name=pubIdent("ofYaml"),
+    params=[retType, nodeParam, typeParam],
+    body=nnkStmtList.newTree(
+        nnkCommand.newTree(
+            ident("expectYMap"),
+            n,
+            newStmtList(
+                nnkAsgn.newTree(
+                    ident("result"),
+                    nnkObjConstr.newTree(
+                        concat(
+                          @[retType],
+                          fields.mapIt(mkObjTypeConsFieldParam(it, n)))))))))
 
-                )
-            )
-        )
-    )
+proc mkOfYamlForTupleType(t: NimNode, fields: seq[Field]): NimNode =
+  let retType = t
+  let nodeParam = newIdentDefs(ident("n"), ident("YNode"))
+  let typeParam = newIdentDefs(ident("t"), 
+                                nnkBracketExpr.newTree(
+                                  ident "typedesc",
+                                  retType
+                                ))
+  let n = ident("n")
+  newProc(
+    name=pubIdent("ofYaml"),
+    params=[retType, nodeParam, typeParam],
+    body=nnkStmtList.newTree(
+      nnkCommand.newTree(
+        ident("expectYMap"),
+        n,
+        newStmtList(
+          nnkAsgn.newTree(
+            ident("result"),
+            nnkTupleConstr.newTree(
+              fields.mapIt(mkObjTypeConsFieldParam(it, n))))))))
 
 proc mkObjTypeTableField(f: Field, obj: NimNode): NimNode =
     nnkExprColonExpr.newTree(
@@ -88,17 +102,25 @@ proc mkToYamlForObjType(t: NimNode, fields: seq[Field]): NimNode =
     let retType = ident("YNode")
     let obj = ident("x")
     newProc(
-        name=pubIdent("toYaml"),
-        params=[retType, newIdentDefs(obj, t)],
-        body=nnkStmtList.newTree(
-            newCall(
-                ident("newYMapRemoveNils"),
-                nnkTableConstr.newTree(
-                    fields.mapIt(mkObjTypeTableField(it, obj))
-                )
-            )
-        )
-    )
+      name=pubIdent("toYaml"),
+      params=[retType, newIdentDefs(obj, t)],
+      body=nnkStmtList.newTree(
+        newCall(
+          ident("newYMapRemoveNils"),
+          nnkTableConstr.newTree(
+            fields.mapIt(mkObjTypeTableField(it, obj))))))
+
+proc mkToYamlForTupleType(t: NimNode, fields: seq[Field]): NimNode =
+    let retType = ident("YNode")
+    let obj = ident("x")
+    newProc(
+      name=pubIdent("toYaml"),
+      params=[retType, newIdentDefs(obj, t)],
+      body=nnkStmtList.newTree(
+        newCall(
+          ident("newYMap"),
+          nnkTableConstr.newTree(
+            fields.mapIt(mkObjTypeTableField(it, obj))))))
 
 proc mkToYamlForEnumType(t: NimNode, vals: seq[EnumVal]): NimNode =
   let retType = ident("YNode")
@@ -287,8 +309,6 @@ proc mkOfYamlForDistinctType(t, base: NimNode): NimNode =
     )
   )
 
-
-
 proc mkToYamlForType(t: NimNode): NimNode =
   let fields = collectObjFieldsForType(t.getImpl())
   case fields.kind
@@ -302,6 +322,9 @@ proc mkToYamlForType(t: NimNode): NimNode =
     return mkToYamlForTypeAlias(t, fields.t)
   of otDistinct:
     return mkToYamlForDistinctType(t, fields.base)
+  of otTuple:
+    # return newEmptyNode()
+    return mkToYamlForTupleType(t, fields.tupleFields)
   of otEmpty:
     error("NOIMPL for empty types", t)
 
@@ -318,6 +341,9 @@ proc mkOfYamlForType(t: NimNode): NimNode =
     return mkOfYamlForTypeAlias(t, fields.t)
   of otDistinct:
     return mkOfYamlForDistinctType(t, fields.base)
+  of otTuple:
+    return mkOfYamlForTupleType(t, fields.tupleFields)
+    # return newEmptyNode()
   of otEmpty:
     error("NOIMPL for empty types", t)
 

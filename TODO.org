@@ -6,8 +6,6 @@
   https://nim-lang.org/docs/tut1.html#advanced-types-sets
 - array types 
   https://nim-lang.org/docs/tut1.html#advanced-types-arrays
-- tuple types
-  https://nim-lang.org/docs/tut1.html#advanced-types-tuples
 ** Cleanup
 - comment reflection.nim
 - comment codegen.nim
