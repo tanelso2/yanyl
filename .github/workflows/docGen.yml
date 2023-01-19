@@ -30,6 +30,8 @@ jobs:
         uses: iffy/install-nim@v4.1.3
         # with:
           #  version: # optional, default is stable
+      - name: Install deps
+        run: nimble install -y
       - name: Nimble genDocs
         run: |
           nimble genDocs
