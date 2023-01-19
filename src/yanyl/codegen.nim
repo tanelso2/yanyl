@@ -1,6 +1,7 @@
 import
   macros,
   sequtils,
+  strformat,
   sugar,
   ./core,
   ./reflection
@@ -243,6 +244,11 @@ proc mkToYamlForVariantType(t: NimNode,
     )
   )
 
+proc mkToYamlForTypeAlias(t, alias: NimNode): NimNode =
+  newCommentStmtNode(fmt"Not generating toYaml() for {$t.repr}, compiler will use implementation for {$alias.repr}")
+
+proc mkOfYamlForTypeAlias(t, alias: NimNode): NimNode =
+  newCommentStmtNode(fmt"Not generating ofYaml() for {$t.repr}, compiler will use implementation for {$alias.repr}")
 
 proc mkToYamlForType(t: NimNode): NimNode =
   let fields = collectObjFieldsForType(t.getImpl())
@@ -253,6 +259,8 @@ proc mkToYamlForType(t: NimNode): NimNode =
     return mkToYamlForVariantType(t, fields.common, fields.discrim, fields.variants)
   of otEnum:
     return mkToYamlForEnumType(t, fields.vals)
+  of otTypeAlias:
+    return mkToYamlForTypeAlias(t, fields.t)
   of otEmpty:
     error("NOIMPL for empty types", t)
 
@@ -265,6 +273,8 @@ proc mkOfYamlForType(t: NimNode): NimNode =
     return mkOfYamlForVariantType(t, fields.common, fields.discrim, fields.variants)
   of otEnum:
     return mkOfYamlForEnumType(t, fields.vals)
+  of otTypeAlias:
+    return mkOfYamlForTypeAlias(t, fields.t)
   of otEmpty:
     error("NOIMPL for empty types", t)
 

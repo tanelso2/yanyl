@@ -105,6 +105,9 @@ proc toYaml*(f: float): YNode =
 proc toYaml*(b: bool): YNode =
     newYString($b)
 
+proc toYaml*(c: char): YNode =
+  newYString($c)
+
 proc toYaml*[T](l: seq[T]): YNode =
     let elems = collect:
         for x in l:
@@ -186,7 +189,7 @@ proc toInt*(n: YNode): int =
       result = parseInt(n.strVal)
 
 proc toFloat*(n: YNode): float =
-  ## Get the int value of the node
+  ## Get the float value of the node
   ## 
   ## Throws if `n` is not a string
   runnableExamples:
@@ -195,6 +198,21 @@ proc toFloat*(n: YNode): float =
 
   expectYString n:
       result = parseFloat(n.strVal)
+
+proc toChar*(n: YNode): char =
+  ## Get the char value of the node
+  ## 
+  ## Throws if `n` is not a string
+  runnableExamples:
+    let n = newYString("8")
+    doAssert n.toChar() == '8'
+
+  expectYString n:
+    let s = n.strVal
+    if len(s) == 1:
+      result = s[0]
+    else:
+      raise newException(ValueError, "Cannot make a char out of a string than isn't length 1")
 
 proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
   runnableExamples:
@@ -253,12 +271,21 @@ proc ofYaml*(n: YNode, t: typedesc[string]): string =
 
   n.str()
 
+proc ofYaml*(n: YNode, t: typedesc[char]): char =
+  n.toChar()
+
 proc ofYaml*(n: YNode, t: typedesc[bool]): bool =
   runnableExamples:
     doAssert ofYaml(newYString("true"), bool) == true
     doAssert ofYaml(newYString("false"), bool) == false
 
   parseBool(n.str())
+
+proc ofYaml*[T](n: YNode, t: typedesc[ref T]): ref T =
+  ofYaml(n, T)
+
+proc toYaml*[T](x: ref T): YNode =
+  toYaml()
 
 proc ofYaml*[T](n: YNode, t: typedesc[Table[string, T]]): Table[string, T] =
   expectYMap n:
