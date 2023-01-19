@@ -250,6 +250,45 @@ proc mkToYamlForTypeAlias(t, alias: NimNode): NimNode =
 proc mkOfYamlForTypeAlias(t, alias: NimNode): NimNode =
   newCommentStmtNode(fmt"Not generating ofYaml() for {$t.repr}, compiler will use implementation for {$alias.repr}")
 
+proc mkToYamlForDistinctType(t, base: NimNode): NimNode =
+  let retType = ident("YNode")
+  let obj = ident("x")
+  newProc(
+    name=pubIdent("toYaml"),
+    params=[retType, newIdentDefs(obj, t)],
+    body=newStmtList(
+      newCall(
+        ident("toYaml"),
+        nnkCommand.newTree(
+          newPar(base),
+          obj
+        )
+      )
+    ),
+  )
+
+proc mkOfYamlForDistinctType(t, base: NimNode): NimNode =
+  let retType = t
+  let n = ident("n")
+  let nodeParam = newIdentDefs(n, ident("YNode"))
+  let typeParam = newIdentDefs(ident("t"), mkTypedesc(retType))
+  newProc(
+    name = pubIdent("ofYaml"),
+    params = [retType, nodeParam, typeParam],
+    body = nnkStmtList.newTree(
+      newCall(
+        ident(t.strVal),
+        newCall(
+          ident("ofYaml"),
+          n,
+          mkTypeDesc(base)
+        )
+      )
+    )
+  )
+
+
+
 proc mkToYamlForType(t: NimNode): NimNode =
   let fields = collectObjFieldsForType(t.getImpl())
   case fields.kind
@@ -261,6 +300,8 @@ proc mkToYamlForType(t: NimNode): NimNode =
     return mkToYamlForEnumType(t, fields.vals)
   of otTypeAlias:
     return mkToYamlForTypeAlias(t, fields.t)
+  of otDistinct:
+    return mkToYamlForDistinctType(t, fields.base)
   of otEmpty:
     error("NOIMPL for empty types", t)
 
@@ -275,6 +316,8 @@ proc mkOfYamlForType(t: NimNode): NimNode =
     return mkOfYamlForEnumType(t, fields.vals)
   of otTypeAlias:
     return mkOfYamlForTypeAlias(t, fields.t)
+  of otDistinct:
+    return mkOfYamlForDistinctType(t, fields.base)
   of otEmpty:
     error("NOIMPL for empty types", t)
 
