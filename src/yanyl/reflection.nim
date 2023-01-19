@@ -9,7 +9,7 @@ type
     name*: string
     t*: NimNode
   ObjType* = enum
-    otObj, otVariant, otEnum, otEmpty
+    otObj, otVariant, otEnum, otEmpty, otTypeAlias
   NimVariant* = object of RootObj
     name*: string
     fields*: seq[Field]
@@ -28,6 +28,11 @@ type
       variants*: seq[NimVariant]
     of otEnum:
       vals*: seq[EnumVal]
+    of otTypeAlias:
+      t*: NimNode
+
+proc newTypeAlias(t: NimNode): ObjFields =
+  ObjFields(kind: otTypeAlias, t: t)
 
 proc discrim*(o: ObjFields): Field = o.discriminator
 
@@ -52,6 +57,10 @@ proc getName*(f: Field): string =
 proc getT*(f: Field): NimNode =
   f.t
 
+proc getTypeDefName*(n: NimNode): string =
+  expectKind(n, nnkTypeDef)
+  n[0].strVal
+
 proc combine(a,b: ObjFields): ObjFields =
   proc noimpl() =
     raise newException(ValueError, fmt"No implementation for comparing {a.kind} and {b.kind}")
@@ -70,6 +79,8 @@ proc combine(a,b: ObjFields): ObjFields =
       noimpl()
     of otEmpty:
       result = a
+    of otTypeAlias:
+      noimpl()
   of otVariant:
     case b.kind
     of otObj:
@@ -89,6 +100,8 @@ proc combine(a,b: ObjFields): ObjFields =
       noimpl()
     of otEmpty:
       result = a
+    of otTypeAlias:
+      noimpl()
   of otEnum:
     case b.kind
     of otObj:
@@ -99,8 +112,12 @@ proc combine(a,b: ObjFields): ObjFields =
       result = newEnumFields(concat(a.vals, b.vals))
     of otEmpty:
       result = a
+    of otTypeAlias:
+      noimpl()
   of otEmpty:
     result = b
+  of otTypeAlias:
+    noimpl()
 
 proc combineAll(x: seq[ObjFields]): ObjFields =
   foldl(x, combine(a,b))
@@ -126,16 +143,19 @@ proc collectEnumFields(x: NimNode): ObjFields =
 
 proc getNameWithoutStar(x: NimNode): string =
   case x.kind
-  of nnkIdent:
+  of nnkIdent, nnkSym:
     return x.strVal
   of nnkPostfix:
     let op = x[0].strVal
     if op == "*":
       return x[1].strVal
     else:
-      raise newException(ValueError, fmt"do no know how to handle postfix op {op}")
+      raise newException(ValueError, fmt"do not know how to handle postfix op {op}")
   else:
     raise newException(ValueError, fmt"do not know how to get name of {x.kind}")
+
+# Forward declaration
+proc collectObjFieldsForType*(t: NimNode): ObjFields
 
 proc fieldOfIdentDef(x: NimNode): Field =
   expectKind(x, nnkIdentDefs)
@@ -145,6 +165,7 @@ proc fieldOfIdentDef(x: NimNode): Field =
 
 # Forward declaration for mutual recursion
 proc collectObjFields(x: NimNode): ObjFields
+
 
 proc collectVariantFields(x: NimNode): ObjFields =
   expectKind(x, nnkRecCase)
@@ -171,53 +192,71 @@ proc collectVariantFields(x: NimNode): ObjFields =
     else:
       error("Don't know how to collect variant fields from ", x)
 
-
-
-
 proc collectObjFields(x: NimNode): ObjFields =
-  proc foldChildren(x: NimNode): ObjFields =
-    let r = collect:
-      for c in x.children:
-        collectObjFields(c)
-    return combineAll(r)
-
   case x.kind
-  of nnkIdent:
+  of nnkIdent, nnkEmpty, nnkNilLit, nnkSym:
     return empty()
-  of nnkEmpty:
-    return empty()
-  of nnkNilLit:
-    return empty()
-  of nnkSym:
-    return empty()
+  of nnkRefTy:
+    return collectObjFields(x[0])
   of nnkIdentDefs:
     return ObjFields(
       kind: otObj,
       fields: @[fieldOfIdentDef(x)]
     )
-  of nnkOfInherit:
-    let parentClassSym = x[0]
-    if parentClassSym.strVal == "RootObj":
-      return empty()
-    else:
-      # echo "GOT INHERITANCE"
-      return collectObjFields(parentClassSym.getImpl())
   of nnkRecList:
-    return foldChildren(x)
-  of nnkObjectTy:
-    return foldChildren(x)
-  of nnkTypeDef:
-    return foldChildren(x)
-  of nnkRefTy:
-    return foldChildren(x)
-  of nnkEnumTy:
-    return collectEnumFields(x)
+    let r = collect:
+      for c in x.children:
+        collectObjFields(c)
+    return combineAll(r)
   of nnkRecCase:
     return collectVariantFields(x)
   else:
     # echo x.kind
     error(fmt"Cannot collect object fields from a NimNode of this kind {x.kind}", x)
 
+proc getParentFieldsFromInherit(t: NimNode): ObjFields =
+  case t.kind
+  of nnkEmpty:
+    return empty()
+  of nnkOfInherit:
+    let parentClassSym = t[0]
+    if parentClassSym.strVal == "RootObj":
+      return empty()
+    else:
+      # echo "GOT INHERITANCE"
+      return collectObjFieldsForType(parentClassSym.getImpl())
+  else:
+    error("cannot get parent fields from this NimNode", t)
+
+
+
+proc collectFieldsFromDefinition(t: NimNode): ObjFields =
+  case t.kind
+  of nnkRefTy:
+    return collectFieldsFromDefinition(t[0])
+  of nnkEnumTy:
+    return collectEnumFields(t) 
+  of nnkObjectTy:
+    let parent = getParentFieldsFromInherit(t[1])
+    let base = collectObjFields(t[2])
+    return combine(parent, base)
+  else:
+    return newTypeAlias(t)
+
+
 proc collectObjFieldsForType*(t: NimNode): ObjFields =
   expectKind(t, nnkTypeDef)
-  collectObjFields(t)
+  let definition = t[2]
+  collectFieldsFromDefinition(definition)
+  # collectObjFields(t)
+
+macro dumpFields*(x: typed) =
+  echo newLit($collectObjFieldsForType(x.getImpl()))
+
+macro dumpImpl*(x: typed) =
+  echo newLit(fmt"Impl for {x}" & "\n")
+  echo newLit(x.getImpl.treeRepr)
+  echo newLit("\n~~~~~~~~~~~~~~\n")
+
+macro dumpTypeImpl*(x: typed) =
+    echo newLit(x.getTypeImpl.treeRepr)
