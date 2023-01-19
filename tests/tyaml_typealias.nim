@@ -3,7 +3,8 @@ import
   sequtils,
   tables,
   unittest,
-  yanyl
+  yanyl,
+  test_utils/yaml_testing
 
 
 type
@@ -27,6 +28,7 @@ check il.len() == 3
 check il[0] == 7
 check il[1] == 8
 check il[2] == 9
+checkRoundTrip il
 
 sample = """
 a: x
@@ -38,6 +40,7 @@ check dict.len() == 3
 check dict["a"] == "x"
 check dict["b"] == "y"
 check dict["c"] == "z"
+checkRoundTrip dict
 
 check ofYamlStr("3", MyInt) == 3
 check ofYamlStr("-78", MyInt) == -78

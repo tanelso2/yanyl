@@ -2,14 +2,17 @@ import
   macros,
   sequtils,
   strformat,
-  sugar
+  sugar,
+  fusion/matching
+
+{.experimental: "caseStmtMacros".}
 
 type
   Field* = object of RootObj
     name*: string
     t*: NimNode
   ObjType* = enum
-    otObj, otVariant, otEnum, otEmpty, otTypeAlias
+    otObj, otVariant, otEnum, otEmpty, otTypeAlias, otDistinct
   NimVariant* = object of RootObj
     name*: string
     fields*: seq[Field]
@@ -30,6 +33,11 @@ type
       vals*: seq[EnumVal]
     of otTypeAlias:
       t*: NimNode
+    of otDistinct:
+      base*: NimNode
+
+proc newDistinct(base: NimNode): ObjFields =
+  ObjFields(kind: otDistinct, base: base)
 
 proc newTypeAlias(t: NimNode): ObjFields =
   ObjFields(kind: otTypeAlias, t: t)
@@ -64,59 +72,35 @@ proc getTypeDefName*(n: NimNode): string =
 proc combine(a,b: ObjFields): ObjFields =
   proc noimpl() =
     raise newException(ValueError, fmt"No implementation for comparing {a.kind} and {b.kind}")
-
-  case a.kind
-  of otObj:
-    case b.kind
-    of otObj:
-      result = newObjFields(concat(a.fields, b.fields))
-    of otVariant:
-      result = newVariantFields(common=concat(a.fields, b.common),
-                                discrim=b.discrim,
-                                variants=b.variants
-                                )
-    of otEnum:
-      noimpl()
-    of otEmpty:
-      result = a
-    of otTypeAlias:
-      noimpl()
-  of otVariant:
-    case b.kind
-    of otObj:
-      result = newVariantFields(common=concat(a.common, b.fields),
-                                discrim=a.discrim,
-                                variants=a.variants
-      )
-    of otVariant:
-      if a.discriminator != b.discriminator:
-        raise newException(ValueError, "Cannot combine variants of different discriminators")
-      result = newVariantFields(
-        common=concat(a.common, b.common),
-        discrim=a.discrim,
-        variants=concat(a.variants, b.variants)
-      )
-    of otEnum:
-      noimpl()
-    of otEmpty:
-      result = a
-    of otTypeAlias:
-      noimpl()
-  of otEnum:
-    case b.kind
-    of otObj:
-      noimpl()
-    of otVariant:
-      noimpl()
-    of otEnum:
-      result = newEnumFields(concat(a.vals, b.vals))
-    of otEmpty:
-      result = a
-    of otTypeAlias:
-      noimpl()
-  of otEmpty:
+  case (a.kind, b.kind)
+  of (otEmpty, _):
     result = b
-  of otTypeAlias:
+  of (_, otEmpty):
+    result = a
+  of (otObj, otObj):
+    result = newObjFields(concat(a.fields, b.fields))
+  of (otObj, otVariant):
+    result = newVariantFields(
+      common=concat(a.fields, b.common),
+      discrim=b.discrim,
+      variants=b.variants)
+  of (otVariant, otObj):
+    result = newVariantFields(
+      common=concat(a.common, b.fields),
+      discrim=a.discrim,
+      variants=a.variants
+    )
+  of (otVariant, otVariant):
+    if a.discriminator != b.discriminator:
+      raise newException(ValueError, "Cannot combine variants of different discriminators")
+    result = newVariantFields(
+      common=concat(a.common, b.common),
+      discrim=a.discrim,
+      variants=concat(a.variants, b.variants)
+    )
+  of (otEnum, otEnum):
+    result = newEnumFields(concat(a.vals, b.vals))
+  else:
     noimpl()
 
 proc combineAll(x: seq[ObjFields]): ObjFields =
@@ -240,6 +224,8 @@ proc collectFieldsFromDefinition(t: NimNode): ObjFields =
     let parent = getParentFieldsFromInherit(t[1])
     let base = collectObjFields(t[2])
     return combine(parent, base)
+  of nnkDistinctTy:
+    return newDistinct(t[0])
   else:
     return newTypeAlias(t)
 

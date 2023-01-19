@@ -8,9 +8,6 @@
   https://nim-lang.org/docs/tut1.html#advanced-types-arrays
 - tuple types
   https://nim-lang.org/docs/tut1.html#advanced-types-tuples
-- char types
-- distinct types
-  https://nim-lang.org/docs/manual.html#types-distinct-type
 ** Cleanup
 - comment reflection.nim
 - comment codegen.nim

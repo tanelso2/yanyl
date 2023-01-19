@@ -11,6 +11,7 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.6.8"
+requires "fusion"
 requires "yaml"
 requires "https://github.com/tanelso2/nim_utils >= 0.3.0"
 
