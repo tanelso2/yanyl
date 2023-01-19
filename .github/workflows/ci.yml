@@ -35,3 +35,6 @@ jobs:
       - name: Nimble test
         run: |
           nimble test
+      - name: Nimble genDocs
+        run: |
+          nimble genDocs
