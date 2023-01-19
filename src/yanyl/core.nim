@@ -83,16 +83,6 @@ template expectYMap*(n, body: untyped) =
     else:
         raise newException(ValueError, "expected map YNode")
 
-# HACKY AND I DON'T LIKE IT
-# Added because the compiler was unable to find ofYaml[T]
-# when evaluating ofYaml[seq[T]] 
-proc ofYaml*[T](n: YNode, t: typedesc[T]): T =
-  ## Default implementation
-  ## 
-  ## Throws an exception complaining that no more specific version of `ofYaml` for type `t` couldn't be found
-  ## 
-  raise newException(ValueError, fmt"No implementation of ofYaml for type {$t}")
-
 proc toYaml*(s: string): YNode =
     newYString(s)
 
@@ -227,6 +217,7 @@ proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
     doAssert res[1] == 2
     doAssert res[2] == 3
 
+  mixin ofYaml
   expectYList n:
       result = collect:
           for x in n.elems():
