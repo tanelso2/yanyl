@@ -204,25 +204,6 @@ proc toChar*(n: YNode): char =
     else:
       raise newException(ValueError, "Cannot make a char out of a string than isn't length 1")
 
-proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
-  runnableExamples:
-    let l = newYList(@[
-      newYString("1"),
-      newYString("2"),
-      newYString("3")
-    ])
-    let res = ofYaml(l, seq[int])
-    doAssert res.len == 3
-    doAssert res[0] == 1
-    doAssert res[1] == 2
-    doAssert res[2] == 3
-
-  mixin ofYaml
-  expectYList n:
-      result = collect:
-          for x in n.elems():
-              ofYaml(x, T)
-
 proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
   runnableExamples:
     import std/options
@@ -240,6 +221,25 @@ proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
     return none(T)
   else:
     return some(ofYaml(n, T))
+
+proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
+  runnableExamples:
+    let l = newYList(@[
+      newYString("1"),
+      newYString("2"),
+      newYString("3")
+    ])
+    let res = ofYaml(l, seq[int])
+    doAssert res.len == 3
+    doAssert res[0] == 1
+    doAssert res[1] == 2
+    doAssert res[2] == 3
+
+  expectYList n:
+      result = collect:
+          for x in n.elems():
+              ofYaml(x, T)
+
 
 proc ofYaml*(n: YNode, t: typedesc[int]): int =
   runnableExamples:
