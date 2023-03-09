@@ -29,5 +29,6 @@ let garf = ofYamlStr(sample, Pet)
 check garf.name == "Garfield"
 check garf.`type` == "cat"
 check garf.owner.name == "J. Arbuckle"
+check garf.owner.`addr` == "711 Maple Street"
 
 checkRoundTrip garf
