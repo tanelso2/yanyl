@@ -128,14 +128,17 @@ proc collectEnumFields(x: NimNode): ObjFields =
   let vals = concat(vs)
   return ObjFields(kind: otEnum, vals: vals)
 
-proc getNameWithoutStar(x: NimNode): string =
+proc getUnadornedName(x: NimNode): string =
+  ## Removes stars and accent quoting
   case x.kind
   of nnkIdent, nnkSym:
     return x.strVal
+  of nnkAccQuoted:
+    return $x
   of nnkPostfix:
     let op = x[0].strVal
     if op == "*":
-      return x[1].strVal
+      return getUnadornedName(x[1])
     else:
       raise newException(ValueError, fmt"do not know how to handle postfix op {op}")
   else:
@@ -147,7 +150,7 @@ proc collectObjFieldsForType*(t: NimNode): ObjFields
 proc fieldOfIdentDef(x: NimNode): Field =
   expectKind(x, nnkIdentDefs)
   # echo x[0]
-  Field(name: getNameWithoutStar(x[0]),
+  Field(name: getUnadornedName(x[0]),
         t: x[1])
 
 # Forward declaration for mutual recursion
