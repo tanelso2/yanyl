@@ -404,7 +404,7 @@ proc toString*(n: YNode, indentLevel=0): string =
                 .join(newline())
     
 
-proc `==`*(a: YNode, b: YNode): bool =
+proc `==`*(a: YNode, b: YNode): bool {.noSideEffect.} =
     ## Compare two yaml documents for equality 
     if a.kind != b.kind:
         return false
