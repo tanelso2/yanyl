@@ -245,18 +245,31 @@ proc collectFieldsFromDefinition(t: NimNode): ObjFields =
 
 
 proc collectObjFieldsForType*(t: NimNode): ObjFields =
+  ## Takes a Nim type and returns an `ObjFields` object
+  ## representing the fields of that object
   expectKind(t, nnkTypeDef)
   let definition = t[2]
   collectFieldsFromDefinition(definition)
   # collectObjFields(t)
 
 macro dumpFields*(x: typed) =
+  ## Dumps the result of running `collectObjFieldsForType`
+  ## for the given type
+  ## Used to debug that proc
+  ## NOTE: Runs at compile time
   echo newLit($collectObjFieldsForType(x.getImpl()))
 
 macro dumpImpl*(x: typed) =
+  ## Used to dump the AST definition of x
+  ## Useful for debugging
+  ## NOTE: Runs at compile time
   echo newLit(fmt"Impl for {x}" & "\n")
   echo newLit(x.getImpl.treeRepr)
   echo newLit("\n~~~~~~~~~~~~~~\n")
 
 macro dumpTypeImpl*(x: typed) =
-    echo newLit(x.getTypeImpl.treeRepr)
+  ## Macro to dump the AST tree of the
+  ## type of x
+  ## Useful for debugging/writing reflection code
+  ## NOTE: Runs at compile time
+  echo newLit(x.getTypeImpl.treeRepr)

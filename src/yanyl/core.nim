@@ -1,4 +1,5 @@
 import
+    fusion/matching,
     options,
     sequtils,
     streams,
