@@ -1,5 +1,4 @@
 import
-    fusion/matching,
     options,
     sequtils,
     streams,
@@ -63,21 +62,21 @@ proc newYList*(elems: seq[string]): YNode =
 proc newYNil*(): YNode =
   YNode(kind: ynNil)
 
-template expectYString*(n, body: untyped) =
+template expectYString*(n: YNode, body: untyped) =
     case n.kind
     of ynString:
         body
     else:
         raise newException(ValueError, "expected string YNode")
 
-template expectYList*(n, body: untyped) =
+template expectYList*(n: YNode, body: untyped) =
     case n.kind
     of ynList:
         body
     else:
         raise newException(ValueError, "expected list YNode")
 
-template expectYMap*(n, body: untyped) =
+template expectYMap*(n: YNode, body: untyped) =
     case n.kind
     of ynMap:
         body

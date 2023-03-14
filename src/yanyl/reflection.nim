@@ -12,7 +12,13 @@ type
     name*: string
     t*: NimNode
   ObjType* = enum
-    otObj, otVariant, otEnum, otEmpty, otTypeAlias, otDistinct, otTuple
+    otObj, 
+    otVariant, 
+    otEnum, 
+    otEmpty, 
+    otTypeAlias, 
+    otDistinct, 
+    otTuple
   NimVariant* = object of RootObj
     name*: string
     fields*: seq[Field]
@@ -24,18 +30,32 @@ type
     of otEmpty:
       discard
     of otObj:
+      ## e.g. Type = object of RootObj
+      ## Object types have a list of fields,
+      ## including fields from their parents.
       fields*: seq[Field]
     of otVariant:
+      ## Variant types have a list of fields in common,
+      ## but also have variants that can hold additional fields.
       common*: seq[Field]
+      ## Discriminator decides between the variants, 
+      ## and is not included in the common fields      
       discriminator*: Field
       variants*: seq[NimVariant]
     of otEnum:
+      ## e.g. Type = enum
+      ## Enums have a list of names and their values
       vals*: seq[EnumVal]
     of otTypeAlias:
+      ## e.g. Type = seq[Foo]
+      ## A type alias can hold anything
       t*: NimNode
     of otDistinct:
+      ## e.g. Type = distinct int
+      ## A distinct type can be made from anything
       base*: NimNode
     of otTuple:
+      ## e.g. Type = tuple
       tupleFields*: seq[Field]
 
 proc newTupleFields(fields: seq[Field]): ObjFields =
@@ -201,7 +221,6 @@ proc collectObjFields(x: NimNode): ObjFields =
   of nnkRecCase:
     return collectVariantFields(x)
   else:
-    # echo x.kind
     error(fmt"Cannot collect object fields from a NimNode of this kind {x.kind}", x)
 
 proc getParentFieldsFromInherit(t: NimNode): ObjFields =
@@ -213,7 +232,6 @@ proc getParentFieldsFromInherit(t: NimNode): ObjFields =
     if parentClassSym.strVal == "RootObj":
       return empty()
     else:
-      # echo "GOT INHERITANCE"
       return collectObjFieldsForType(parentClassSym.getImpl())
   else:
     error("cannot get parent fields from this NimNode", t)
@@ -250,18 +268,21 @@ proc collectObjFieldsForType*(t: NimNode): ObjFields =
   expectKind(t, nnkTypeDef)
   let definition = t[2]
   collectFieldsFromDefinition(definition)
-  # collectObjFields(t)
 
 macro dumpFields*(x: typed) =
   ## Dumps the result of running `collectObjFieldsForType`
   ## for the given type
+  ## 
   ## Used to debug that proc
+  ## 
   ## NOTE: Runs at compile time
   echo newLit($collectObjFieldsForType(x.getImpl()))
 
 macro dumpImpl*(x: typed) =
   ## Used to dump the AST definition of x
+  ## 
   ## Useful for debugging
+  ## 
   ## NOTE: Runs at compile time
   echo newLit(fmt"Impl for {x}" & "\n")
   echo newLit(x.getImpl.treeRepr)
@@ -270,6 +291,8 @@ macro dumpImpl*(x: typed) =
 macro dumpTypeImpl*(x: typed) =
   ## Macro to dump the AST tree of the
   ## type of x
+  ## 
   ## Useful for debugging/writing reflection code
+  ## 
   ## NOTE: Runs at compile time
   echo newLit(x.getTypeImpl.treeRepr)
