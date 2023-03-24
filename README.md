@@ -30,7 +30,7 @@ assert o.s == "hello world"
 
 Add the following to your `.nimble` file:
 ```
-requires "https://github.com/tanelso2/yanyl >= 0.0.4"
+requires "yanyl"
 ```
 
 # Usage
