@@ -258,3 +258,63 @@ proc toYaml(x: V): YNode =
                                 ("i", toYaml(x.i))])
 ```
 
+# Comparison with [NimYAML](https://github.com/flyx/NimYAML)
+
+If you're using yanyl, you're already using NimYAML. Yanyl uses NimYAML as a parser, and then translates from NimYAML's `YamlNode` to yanyl's `YNode`. Yanyl discards tag information in doing so, and yanyl's `toYamlStr` and related functions do not emit tags either.
+
+Why would you use Yanyl instead of just using NimYAML directly?
+
+## Simplified Output
+NimYAML's output contains tags that allow it to reconstruct the object that was deserialized. Yanyl's output is a lot simpler and doesn't include any tag information.
+
+For example, the following code
+
+```nim
+import
+  yaml,
+  yanyl
+
+type
+  Obj = object of RootObj
+    i*: int
+    s*: string
+
+deriveYaml Obj
+
+var o = Obj(i: 42, s: "Hello galaxy")
+# NimYAML
+echo dump(o)
+# Yanyl
+echo toYamlStr(o)
+```
+
+will result in the outputs
+
+NimYAML: 
+
+```yaml
+%YAML 1.2
+%TAG !n! tag:nimyaml.org,2016:
+--- !n!custom:Obj 
+i: 42
+s: Hello galaxy
+```
+
+Yanyl:
+
+```yaml
+s: Hello galaxy
+i: 42
+```
+
+
+## Support for more Nim types
+I had trouble when using NimYAML where I was structuring my types to better work around what NimYAML could parse. I built yanyl so that I could structure my types how I normally would, and then used macro programming to make it write the `ofYaml`/`toYaml` functions that I would have.
+
+NimYAML is more strict about types whereas Yanyl is more akin to duck-typing. If an object has the fields expected, Yanyl will stuff it into the type you specified.
+
+**Note**: some of the things I thought were NimYAML's intended behavior may actually be bugs, so I will work on reporting those properly instead of just spinning off my own library.
+
+## Explicit declarations
+As a newbie to Nim macro programming, I wasn't sure how or where NimYAML was creating functions. Yanyl makes it clear with its `derive` macros. It is more boilerplate for the developer, but I think it makes it clear and easier to debug.
+
