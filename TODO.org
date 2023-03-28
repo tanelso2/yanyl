@@ -9,3 +9,6 @@
 ** Cleanup
 - comment reflection.nim
 - comment codegen.nim
+** CI
+- Automate creating a github release when new tag is pushed
+- Automate bumping the version and tagging locally? `nimble bumpMinorVersion`, `nimble bumpVersion`, etc.?
