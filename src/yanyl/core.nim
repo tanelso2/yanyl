@@ -99,10 +99,10 @@ proc toYaml*(c: char): YNode =
   newYString($c)
 
 proc toYaml*[T](l: seq[T]): YNode =
-    let elems = collect:
-        for x in l:
-          toYaml(x)
-    return elems.newYList()
+  var elems = newSeq[YNode]()
+  for x in l:
+    elems.add(x.toYaml())
+  return elems.newYList()
 
 proc toYaml*[T](o: Option[T]): YNode =
   if o.isSome():
