@@ -101,7 +101,7 @@ proc toYaml*(c: char): YNode =
 proc toYaml*[T](l: seq[T]): YNode =
     let elems = collect:
         for x in l:
-            toYaml(x)
+          toYaml(x)
     return elems.newYList()
 
 proc toYaml*[T](o: Option[T]): YNode =

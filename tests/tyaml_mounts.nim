@@ -3,7 +3,7 @@ import
   test_utils/yaml_testing,
   unittest
 
-type 
+type
     MountKind* = enum
         mkTmpfs = "tmpfs"
         mkS3fs = "s3fs"

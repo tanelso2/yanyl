@@ -1,7 +1,7 @@
 # Package
 # Yet Another Nim Yaml Library
 # YANYL
-version       = "1.0.1"
+version       = "1.0.2"
 author        = "Thomas Nelson"
 description   = "A library for working with YAML in Nim"
 license       = "Unlicense"
@@ -12,7 +12,7 @@ srcDir        = "src"
 
 requires "nim >= 1.6.8"
 requires "fusion"
-requires "yaml >= 1.1.0"
+requires "yaml == 1.1.0"
 
 import
   strformat
