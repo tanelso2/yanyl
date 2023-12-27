@@ -10,7 +10,7 @@ srcDir        = "src"
 
 # Dependencies
 
-requires "nim >= 1.6.8"
+requires "nim >= 2.0.2"
 requires "fusion"
 requires "yaml == 1.1.0"
 
