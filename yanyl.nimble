@@ -12,7 +12,7 @@ srcDir        = "src"
 
 requires "nim >= 2.0.2"
 requires "fusion"
-requires "yaml == 1.1.0"
+requires "yaml == 2.0.0"
 
 import
   strformat
