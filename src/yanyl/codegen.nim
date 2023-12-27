@@ -3,7 +3,6 @@ import
   sequtils,
   strformat,
   sugar,
-  ./core,
   ./reflection
 
 proc mkYNodeGetCall(n: NimNode, k: string): NimNode =

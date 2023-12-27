@@ -6,7 +6,11 @@ import
     strutils,
     sugar,
     tables,
-    yaml
+    yaml,
+    yaml/data,
+    yaml/dom
+
+export data, dom
 
 type
   YNodeKind* = enum
@@ -343,8 +347,7 @@ proc loadNode*(s: string | Stream): YNode =
     doAssert n.get("i", int) == 3
     doAssert n.get("f", float) == 0.32
 
-  var node: YamlNode
-  load(s,node)
+  var node: YamlNode = loadAs[YamlNode](s)
   return translate(node)
 
 proc newline(i: int): string =

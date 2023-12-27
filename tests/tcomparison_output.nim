@@ -11,6 +11,6 @@ deriveYaml Obj
 
 var o = Obj(i: 42, s: "Hello galaxy")
 # NimYAML
-echo dump(o)
+echo dump(jsonDumper(), o)
 # Yanyl
 echo toYamlStr(o)

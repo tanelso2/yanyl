@@ -19,5 +19,6 @@ assert y.get("c").kind == ynList
 import
   streams
 
-let s2 = newFileStream("example.yaml")
+let s2 = newFileStream("tests/example.yaml")
 let y2: YNode = s2.loadNode()
+assert y2.get("name").kind == ynString
