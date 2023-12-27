@@ -221,7 +221,8 @@ proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
   expectYList n:
       result = collect:
           for x in n.elems():
-              ofYaml(x, T)
+              let v = ofYaml(x, T)
+              v
 
 proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
   runnableExamples:
