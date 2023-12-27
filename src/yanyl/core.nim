@@ -6,8 +6,7 @@ import
     strutils,
     sugar,
     tables,
-    yaml,
-    yaml/dom
+    yaml
 
 type
   YNodeKind* = enum

@@ -14,3 +14,10 @@ let y: YNode = s.loadNode()
 assert y.kind == ynMap
 assert y.get("a").kind == ynString
 assert y.get("c").kind == ynList
+# assert y.get("d").kind == ynString
+
+import
+  streams
+
+let s2 = newFileStream("example.yaml")
+let y2: YNode = s2.loadNode()
