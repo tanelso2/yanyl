@@ -25,3 +25,9 @@ task genDocs, "Generate the docs":
   let url = "https://github.com/tanelso2/yanyl"
   exec fmt"nim doc --project --git.url:{url} --git.commit:{gitHash} --git.devel:main --outdir:docs src/yanyl.nim"
   exec "cp docs/yanyl.html docs/index.html"
+
+task release, "Do a release at the current version":
+  exec fmt"git commit -a -m 'v{version}'"
+  exec fmt"git tag v{version}"
+  exec fmt"git push"
+  exec fmt"git push origin v{version}"
