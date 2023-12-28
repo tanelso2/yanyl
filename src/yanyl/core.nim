@@ -307,6 +307,13 @@ proc get*[T](n: YNode, k: string, t: typedesc[Option[T]]): Option[T] =
     else:
       none(T)
 
+proc get*[T](n: YNode, k: string, t: typedesc[seq[T]]): seq[T] =
+  expectYMap n:
+    let m = n.mapVal
+    if k in m:
+      ofYaml(m[k], seq[T])
+    else:
+      @[]
 
 proc simplifyName(k: YamlNode): string =
   case k.kind
