@@ -127,7 +127,7 @@ proc toYaml*[T](t: TableRef[string, T]): YNode =
 
 proc get*(n: YNode, k: string): YNode =
   ## Get the map value associated with `k`
-  ## 
+  ##
   ## Throws if `n` is not a map
   runnableExamples:
     let m = newYMap({
@@ -168,7 +168,7 @@ proc str*(n: YNode): string =
 
 proc getStr*(n: YNode, k: string): string =
     expectYMap n:
-        n.get(k).str()
+        result = n.get(k).str()
 
 proc toInt*(n: YNode): int =
   ## Get the int value of the node
