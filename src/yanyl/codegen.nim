@@ -145,7 +145,10 @@ proc mkEnumOfBranch(val: EnumVal): NimNode =
       ident(val.name)
     ),
     newStmtList(
-      ident(val.name)
+      nnkAsgn.newTree(
+        ident("result"),
+        ident(val.name)
+      )
     )
   )
 

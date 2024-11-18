@@ -19,7 +19,7 @@ check e == e1
 type
   CustomVal = enum
     cv1 = "1"
-    cv2 
+    cv2
 
 deriveYaml CustomVal 
 

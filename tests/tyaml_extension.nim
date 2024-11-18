@@ -31,9 +31,9 @@ proc ofYaml(n: YNode, t: typedesc[MountKind]): MountKind =
     expectYString n:
         case n.strVal
         of $mkTmpfs:
-            mkTmpfs
+            result = mkTmpfs
         of $mkS3fs:
-            mkS3fs
+            result = mkS3fs
         else:
             raise newException(ValueError, fmt"unknown kind {n.strVal}")
 
