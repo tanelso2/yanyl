@@ -13,9 +13,9 @@ type
         a: string
 
 proc ofYaml(n: YNode, t: typedesc[Simple]): Simple =
-    expectYMap n:
-        let a = n.get("a").ofYaml( typeof Simple.a )
-        result = Simple(a: a)
+    assertYMap n
+    let a = n.get("a").ofYaml( typeof Simple.a )
+    result = Simple(a: a)
 
 proc toYaml(x: Simple): YNode =
     {
@@ -174,7 +174,7 @@ check c.c == "def"
 check c.d.a == "abc"
 checkRoundTrip c
 
-type 
+type
     MyEnum = enum
         my1, my2, my3
 
@@ -192,22 +192,22 @@ type
             s: string
 
 # proc ofYaml(n: YNode, t: typedesc[MyVariant]): MyVariant =
-#     expectYMap n:
-#         let kind = ofYaml(n.get("kind"), MyEnum)
-#         case kind
-#         of my1:
-#             result = MyVariant(kind: my1,
-#                                 c: ofYaml(n.get("c"), string),
-#                                 i: ofYaml(n.get("i"), int)
-#             )
-#         of my2:
-#             result = MyVariant(kind: my2,
-#                                 c: ofYaml(n.get("c", string)))
-#         of my3:
-#             result = MyVariant(kind: my3,
-#                                 c: ofYaml(n.get("c", string)),
-#                                 s: ofYaml(n.get("s", string))
-#             )
+#   assertYMap n
+#   let kind = ofYaml(n.get("kind"), MyEnum)
+#   case kind
+#   of my1:
+#       result = MyVariant(kind: my1,
+#                           c: ofYaml(n.get("c"), string),
+#                           i: ofYaml(n.get("i"), int)
+#       )
+#   of my2:
+#       result = MyVariant(kind: my2,
+#                           c: ofYaml(n.get("c", string)))
+#   of my3:
+#       result = MyVariant(kind: my3,
+#                           c: ofYaml(n.get("c", string)),
+#                           s: ofYaml(n.get("s", string))
+#       )
 
 # dumpTree:
 #     proc toYaml(x: MyVariant): YNode =

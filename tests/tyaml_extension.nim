@@ -9,7 +9,7 @@ import
 import
   test_utils/yaml_testing
 
-type 
+type
   MountKind* = enum
     mkTmpfs = "tmpfs"
     mkS3fs = "s3fs"
@@ -28,42 +28,42 @@ type
     mounts*: seq[Mount]
 
 proc ofYaml(n: YNode, t: typedesc[MountKind]): MountKind =
-    expectYString n:
-        case n.strVal
-        of $mkTmpfs:
-            result = mkTmpfs
-        of $mkS3fs:
-            result = mkS3fs
-        else:
-            raise newException(ValueError, fmt"unknown kind {n.strVal}")
+  assertYString n
+  case n.strVal
+  of $mkTmpfs:
+      result = mkTmpfs
+  of $mkS3fs:
+      result = mkS3fs
+  else:
+      raise newException(ValueError, fmt"unknown kind {n.strVal}")
 
 
 proc ofYaml(n: YNode, t: typedesc[Mount]): Mount =
-    expectYMap n:
-        let kind = ofYaml(n.get("kind"), MountKind)
-        let mountPoint = n.get("mountPoint").str()
-        let name = n.getStr("name")
-        case kind
-        of mkS3fs:
-            let key = n.get("key").str()
-            let secret = n.getStr("secret")
-            let bucket = n.getStr("bucket")
-            result = Mount(kind: kind,
-                           mountPoint: mountPoint, 
-                           key: key, 
-                           secret: secret, 
-                           bucket: bucket, 
-                           name: name)
-        of mkTmpfs:
-            result = Mount(kind: kind,
-                           mountPoint: mountPoint, 
-                           name: name)
+    assertYMap n
+    let kind = ofYaml(n.get("kind"), MountKind)
+    let mountPoint = n.get("mountPoint").str()
+    let name = n.getStr("name")
+    case kind
+    of mkS3fs:
+        let key = n.get("key").str()
+        let secret = n.getStr("secret")
+        let bucket = n.getStr("bucket")
+        result = Mount(kind: kind,
+                       mountPoint: mountPoint,
+                       key: key,
+                       secret: secret,
+                       bucket: bucket,
+                       name: name)
+    of mkTmpfs:
+        result = Mount(kind: kind,
+                       mountPoint: mountPoint,
+                       name: name)
 
 proc ofYaml(n: YNode, t: typedesc[Con]): Con =
-    expectYMap n:
-        let name = n.getStr("name")
-        let mounts: seq[Mount] = ofYaml(n.get("mounts"), seq[Mount])
-        return Con(name: name, mounts: mounts)
+    assertYMap n
+    let name = n.getStr("name")
+    let mounts: seq[Mount] = ofYaml(n.get("mounts"), seq[Mount])
+    return Con(name: name, mounts: mounts)
 
 proc toYaml(m: Mount): YNode =
     let common = {
