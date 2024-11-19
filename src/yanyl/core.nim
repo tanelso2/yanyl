@@ -65,26 +65,35 @@ proc newYList*(elems: seq[string]): YNode =
 proc newYNil*(): YNode =
   YNode(kind: ynNil)
 
-template expectYString*(n: YNode, body: untyped) =
+template expectYString*(n: YNode, body: untyped) {.deprecated.} =
     case n.kind
     of ynString:
         body
     else:
         raise newException(ValueError, "expected string YNode")
 
-template expectYList*(n: YNode, body: untyped) =
+template expectYList*(n: YNode, body: untyped) {.deprecated.} =
     case n.kind
     of ynList:
         body
     else:
         raise newException(ValueError, "expected list YNode")
 
-template expectYMap*(n: YNode, body: untyped) =
+template expectYMap*(n: YNode, body: untyped) {.deprecated.} =
     case n.kind
     of ynMap:
         body
     else:
         raise newException(ValueError, "expected map YNode")
+
+template assertYString*(n: YNode) =
+  doAssert n.kind == ynString
+
+template assertYMap*(n: YNode) =
+  doAssert n.kind == ynMap
+
+template assertYList*(n: YNode) =
+  doAssert n.kind == ynList
 
 proc toYaml*(s: string): YNode =
     newYString(s)
@@ -137,8 +146,8 @@ proc get*(n: YNode, k: string): YNode =
     doAssert a.kind == ynString
     doAssert a.strVal == "astring"
 
-  expectYMap n:
-      result = n.mapVal[k]
+  assertYMap n
+  n.mapVal[k]
 
 proc elems*(n: YNode): seq[YNode] =
   ## Get the list value of the node
@@ -152,60 +161,60 @@ proc elems*(n: YNode): seq[YNode] =
     doAssert items[0].kind == ynNil
     doAssert items[1].strVal == "abc"
 
-  expectYList n:
-      result = n.listVal
+  assertYList n
+  n.listVal
 
 proc str*(n: YNode): string =
   ## Get the string value of the node
-  ## 
+  ##
   ## Throws if `n` is not a string
   runnableExamples:
     let s = newYString("abc")
     doAssert s.str() == "abc"
 
-  expectYString n:
-      result = n.strVal
+  assertYString n
+  n.strVal
 
 proc getStr*(n: YNode, k: string): string =
-    expectYMap n:
-        result = n.get(k).str()
+    assertYMap n
+    n.get(k).str()
 
 proc toInt*(n: YNode): int =
   ## Get the int value of the node
-  ## 
+  ##
   ## Throws if `n` is not a string
   runnableExamples:
     let n = newYString("123")
     doAssert n.toInt() == 123
 
-  expectYString n:
-      result = parseInt(n.strVal)
+  assertYString n
+  parseInt(n.strVal)
 
 proc toFloat*(n: YNode): float =
   ## Get the float value of the node
-  ## 
+  ##
   ## Throws if `n` is not a string
   runnableExamples:
     let n = newYString("3.14")
-    doAssert n.toFloat() == 3.14 
+    doAssert n.toFloat() == 3.14
 
-  expectYString n:
-      result = parseFloat(n.strVal)
+  assertYString n
+  parseFloat(n.strVal)
 
 proc toChar*(n: YNode): char =
   ## Get the char value of the node
-  ## 
+  ##
   ## Throws if `n` is not a string
   runnableExamples:
     let n = newYString("8")
     doAssert n.toChar() == '8'
 
-  expectYString n:
-    let s = n.strVal
-    if len(s) == 1:
-      result = s[0]
-    else:
-      raise newException(ValueError, "Cannot make a char out of a string than isn't length 1")
+  assertYString n
+  let s = n.strVal
+  if len(s) == 1:
+    s[0]
+  else:
+    raise newException(ValueError, "Cannot make a char out of a string than isn't length 1")
 
 proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
   runnableExamples:
@@ -221,10 +230,10 @@ proc ofYaml*[T](n: YNode, t: typedesc[seq[T]]): seq[T] =
     doAssert res[2] == 3
 
   mixin ofYaml
-  expectYList n:
-    result = newSeq[T]()
-    for x in n.elems():
-      result.add(ofYaml(x, T))
+  assertYList n
+  result = newSeq[T]()
+  for x in n.elems():
+    result.add(ofYaml(x, T))
 
 proc ofYaml*[T](n: YNode, t: typedesc[Option[T]]): Option[T] =
   runnableExamples:
@@ -282,38 +291,38 @@ proc toYaml*[T](x: ref T): YNode =
   toYaml()
 
 proc ofYaml*[T](n: YNode, t: typedesc[Table[string, T]]): Table[string, T] =
-  expectYMap n:
-    let m = collect:
-      for k,v in n.mapVal.pairs:
-        {k: ofYaml(v, T)}
-    return m
+  assertYMap n
+  let m = collect:
+    for k,v in n.mapVal.pairs:
+      {k: ofYaml(v, T)}
+  return m
 
 proc ofYaml*[T](n: YNode, t: typedesc[TableRef[string, T]]): TableRef[string, T] =
-  expectYMap n:
-    let m = collect:
-      for k,v in n.mapVal.pairs:
-        (k, ofYaml(v, T))
-    return m.newTable()
+  assertYMap n
+  let m = collect:
+    for k,v in n.mapVal.pairs:
+      (k, ofYaml(v, T))
+  return m.newTable()
 
 proc get*[T](n: YNode, k: string, t: typedesc[T]): T =
-  expectYMap n:
-    result = n.get(k).ofYaml(t)
+  assertYMap n
+  n.get(k).ofYaml(t)
 
 proc get*[T](n: YNode, k: string, t: typedesc[Option[T]]): Option[T] =
-  expectYMap n:
-    let m = n.mapVal
-    if k in m:
-      result = some(ofYaml(m[k], T))
-    else:
-      result = none(T)
+  assertYMap n
+  let m = n.mapVal
+  if k in m:
+    some(ofYaml(m[k], T))
+  else:
+    none(T)
 
 proc get*[T](n: YNode, k: string, t: typedesc[seq[T]]): seq[T] =
-  expectYMap n:
-    let m = n.mapVal
-    if k in m:
-      result = ofYaml(m[k], seq[T])
-    else:
-      result = @[]
+  assertYMap n
+  let m = n.mapVal
+  if k in m:
+    ofYaml(m[k], seq[T])
+  else:
+    @[]
 
 proc simplifyName(k: YamlNode): string =
   case k.kind
@@ -329,16 +338,16 @@ proc translate(n: YamlNode): YNode =
     for k,v in n.fields.pairs:
       let name = simplifyName(k)
       t[name] = translate(v)
-    result = newYMap(t)
+    newYMap(t)
   of ySequence:
     let elems = n.elems.mapIt(translate(it))
-    result = newYList(elems)
+    newYList(elems)
   else:
     let content = n.content
     if content == "null":
-      result = newYNil()
+      newYNil()
     else:
-      result = newYString(n.content)
+      newYString(n.content)
 
 proc loadNode*(s: string | Stream): YNode =
   ## Load a YNode from a YAML string or stream
@@ -400,21 +409,20 @@ proc toString*(n: YNode, indentLevel=0): string =
         else:
             return s.join(newline())
     of ynNil:
-      return "null" 
+      return "null"
     of ynList:
         let elems = n.listVal
         case len(elems)
-        of 0: 
+        of 0:
             return "[]"
         else:
             return elems
                 .mapIt(toString(it,indentLevel=indentLevel+2))
                 .mapIt("- $1" % it)
                 .join(newline())
-    
 
 proc `==`*(a: YNode, b: YNode): bool {.noSideEffect.} =
-    ## Compare two yaml documents for equality 
+    ## Compare two yaml documents for equality
     if a.kind != b.kind:
         return false
     else:

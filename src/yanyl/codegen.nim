@@ -21,8 +21,8 @@ proc mkTypedesc(t: NimNode): NimNode =
 
 proc getValueForField(f: Field, obj: NimNode): NimNode =
     mkYNodeGetCall(
-      obj, 
-      f.getName(), 
+      obj,
+      f.getName(),
       mkTypedesc(f.getT()))
 
 proc pubIdent(s: string): NimNode =
@@ -42,7 +42,7 @@ proc mkObjTypeConsFieldParam(f: Field, obj: NimNode): NimNode =
 proc mkOfYamlForObjType(t: NimNode, fields: seq[Field]): NimNode =
   let retType = t
   let nodeParam = newIdentDefs(ident("n"), ident("YNode"))
-  let typeParam = newIdentDefs(ident("t"), 
+  let typeParam = newIdentDefs(ident("t"),
                                 nnkBracketExpr.newTree(
                                   ident "typedesc",
                                   retType
@@ -53,20 +53,18 @@ proc mkOfYamlForObjType(t: NimNode, fields: seq[Field]): NimNode =
     params=[retType, nodeParam, typeParam],
     body=nnkStmtList.newTree(
         nnkCommand.newTree(
-            ident("expectYMap"),
-            n,
-            newStmtList(
-                nnkAsgn.newTree(
-                    ident("result"),
-                    nnkObjConstr.newTree(
-                        concat(
-                          @[retType],
-                          fields.mapIt(mkObjTypeConsFieldParam(it, n)))))))))
+          ident("assertYMap"),
+          n
+        ),
+        nnkObjConstr.newTree(
+            concat(
+              @[retType],
+              fields.mapIt(mkObjTypeConsFieldParam(it, n))))))
 
 proc mkOfYamlForTupleType(t: NimNode, fields: seq[Field]): NimNode =
   let retType = t
   let nodeParam = newIdentDefs(ident("n"), ident("YNode"))
-  let typeParam = newIdentDefs(ident("t"), 
+  let typeParam = newIdentDefs(ident("t"),
                                 nnkBracketExpr.newTree(
                                   ident "typedesc",
                                   retType
@@ -77,13 +75,11 @@ proc mkOfYamlForTupleType(t: NimNode, fields: seq[Field]): NimNode =
     params=[retType, nodeParam, typeParam],
     body=nnkStmtList.newTree(
       nnkCommand.newTree(
-        ident("expectYMap"),
-        n,
-        newStmtList(
-          nnkAsgn.newTree(
-            ident("result"),
-            nnkTupleConstr.newTree(
-              fields.mapIt(mkObjTypeConsFieldParam(it, n))))))))
+        ident "assertYMap",
+        n
+      ),
+      nnkTupleConstr.newTree(
+        fields.mapIt(mkObjTypeConsFieldParam(it, n)))))
 
 proc mkObjTypeTableField(f: Field, obj: NimNode): NimNode =
     nnkExprColonExpr.newTree(
@@ -145,10 +141,7 @@ proc mkEnumOfBranch(val: EnumVal): NimNode =
       ident(val.name)
     ),
     newStmtList(
-      nnkAsgn.newTree(
-        ident("result"),
-        ident(val.name)
-      )
+      ident(val.name)
     )
   )
 
@@ -179,22 +172,22 @@ proc mkOfYamlForEnumType(t: NimNode, vals: seq[EnumVal]): NimNode =
       params=[retType, nodeParam, typeParam],
       body=nnkStmtList.newTree(
         nnkCommand.newTree(
-          ident("expectYString"),
-          n,
-          newStmtList(
-            nnkCaseStmt.newTree(
-              concat(@[
-                  nnkDotExpr.newTree(
-                    n, ident("strVal")
-                  )
-                ],
-                vals.mapIt(mkEnumOfBranch(it)),
-                @[elseBranch])
-            )))))
+          ident "assertYString",
+          n
+        ),
+        nnkCaseStmt.newTree(
+          concat(@[
+              nnkDotExpr.newTree(
+                n, ident("strVal")
+              )
+            ],
+            vals.mapIt(mkEnumOfBranch(it)),
+            @[elseBranch])
+        )))
 
-proc mkOfYamlForVariantType(t: NimNode, 
-                            common: seq[Field], 
-                            discrim: Field, 
+proc mkOfYamlForVariantType(t: NimNode,
+                            common: seq[Field],
+                            discrim: Field,
                             variants: seq[NimVariant]): NimNode =
   let retType = t
   let n = ident("n")
@@ -205,13 +198,11 @@ proc mkOfYamlForVariantType(t: NimNode,
     nnkOfBranch.newTree(
       ident(v.name),
       newStmtList(
-        nnkAsgn.newTree(
-          ident("result"),
-          nnkObjConstr.newTree(
-            concat(
-              @[t,
-                newColonExpr(kind, kind)],
-              neededFields.mapIt(mkObjTypeConsFieldParam(it, n)))))))
+        nnkObjConstr.newTree(
+          concat(
+            @[t,
+              newColonExpr(kind, kind)],
+            neededFields.mapIt(mkObjTypeConsFieldParam(it, n))))))
 
   let nodeParam = newIdentDefs(n, ident("YNode"))
   let typedescType = nnkBracketExpr.newTree(
@@ -226,17 +217,17 @@ proc mkOfYamlForVariantType(t: NimNode,
     params=[retType, nodeParam, typeParam],
     body=newStmtList(
       nnkCommand.newTree(
-        ident("expectYMap"),
-        n,
-        newStmtList(
-          newLetStmt(kind,
-                     getValueForField(discrim, n)),
-          nnkCaseStmt.newTree(
-            concat(@[kind], ofBranches))))))
+        ident "assertYMap",
+        n
+      ),
+      newLetStmt(kind,
+                 getValueForField(discrim, n)),
+      nnkCaseStmt.newTree(
+        concat(@[kind], ofBranches))))
 
 proc mkToYamlForVariantType(t: NimNode,
-                            common: seq[Field], 
-                            discrim: Field, 
+                            common: seq[Field],
+                            discrim: Field,
                             variants: seq[NimVariant]): NimNode =
   let retType = ident("YNode")
   let obj = ident("x")
@@ -244,13 +235,10 @@ proc mkToYamlForVariantType(t: NimNode,
     let neededFields = @[discrim] & common & v.fields
     nnkOfBranch.newTree(
       ident(v.name),
-      nnkAsgn.newTree(
-        ident("result"),
-        newCall(
-          ident("newYMapRemoveNils"),
-          nnkTableConstr.newTree(
-            neededFields.mapIt(mkObjTypeTableField(it, obj))
-          )
+      newCall(
+        ident("newYMapRemoveNils"),
+        nnkTableConstr.newTree(
+          neededFields.mapIt(mkObjTypeTableField(it, obj))
         )
       )
     )

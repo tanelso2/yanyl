@@ -219,43 +219,37 @@ will output:
 
 ```nim
 proc ofYaml(n: YNode; t: typedesc[E]): E =
-  case n.kind
-  of ynString:
-    case n.strVal
-    of $eStr:
-      eStr
-    of $eInt:
-      eInt
-    else:
-      raise newException(ValueError, "unknown kind: " & n.strVal)
+  assertYString n
+  case n.strVal
+  of $eStr:
+    eStr
+  of $eInt:
+    eInt
   else:
-    raise newException(ValueError, "expected string YNode")
+    raise newException(ValueError, "unknown kind: " & n.strVal)
 
 proc toYaml(x: E): YNode =
   result = newYString($x)
 
 proc ofYaml(n: YNode; t: typedesc[V]): V =
-  case n.kind
-  of ynMap:
-    let kind = n.get("kind", typedesc[E])
-    case kind
-    of eStr:
-      result = V(kind: kind, c: n.get("c", typedesc[string]),
-                 s: n.get("s", typedesc[string]))
-    of eInt:
-      result = V(kind: kind, c: n.get("c", typedesc[string]),
-                 i: n.get("i", typedesc[int]))
-  else:
-    raise newException(ValueError, "expected map YNode")
+  assertYMap n
+  let kind = n.get("kind", typedesc[E])
+  case kind
+  of eStr:
+    V(kind: kind, c: n.get("c", typedesc[string]),
+      s: n.get("s", typedesc[string]))
+  of eInt:
+    V(kind: kind, c: n.get("c", typedesc[string]),
+      i: n.get("i", typedesc[int]))
 
 proc toYaml(x: V): YNode =
-  case x.kind
+  result = case x.kind
   of eStr:
-    result = newYMapRemoveNils([("kind", toYaml(x.kind)), ("c", toYaml(x.c)),
-                                ("s", toYaml(x.s))])
+    newYMapRemoveNils([("kind", toYaml(x.kind)), ("c", toYaml(x.c)),
+                       ("s", toYaml(x.s))])
   of eInt:
-    result = newYMapRemoveNils([("kind", toYaml(x.kind)), ("c", toYaml(x.c)),
-                                ("i", toYaml(x.i))])
+    newYMapRemoveNils([("kind", toYaml(x.kind)), ("c", toYaml(x.c)),
+                       ("i", toYaml(x.i))])
 ```
 
 # Comparison with [NimYAML](https://github.com/flyx/NimYAML)
@@ -314,6 +308,7 @@ I had trouble when using NimYAML where I was structuring my types to better work
 NimYAML is more strict about types whereas Yanyl is more akin to duck-typing. If an object has the fields expected, Yanyl will stuff it into the type you specified.
 
 **Note**: some of the things I thought were NimYAML's intended behavior may actually be bugs, so I will work on reporting those properly instead of just spinning off my own library.
+**Note 2024-11-18:** some of these things may have been fixed in more recent versions of NimYAML. It has been a while since I checked in on its behavior with types and generating code.
 
 ## Explicit declarations
 As a newbie to Nim macro programming, I wasn't sure how or where NimYAML was creating functions. Yanyl makes it clear with its `derive` macros. It is more boilerplate for the developer, but I think it makes it clear and easier to debug.
